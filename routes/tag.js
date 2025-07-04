@@ -1,3 +1,5 @@
+console.log('ROUTER FICHIER CHARGÉ');
+
 const express = require('express');
 const router = express.Router();
 const connection = require('../services/connection.js');
@@ -44,17 +46,20 @@ router.get('/', async (req, res) => {
 // Créer un nouveau tag
 
 router.post('/', async (req, res) => {
+    console.log('ok');
+    console.log('BODY:', req.body);
     const { name } = req.body;
 
     // Validation : on vérifie que le nom est fourni
-    if (!name) return res.status[400].json({ message: 'Nom requis' });
+    if (!name) return res.status(400).json({ message: 'Nom requis' });
 
     try {
+        const getConnection = await connection();
         // Requête pour insérer un nouveau tag dans la base
-        const [result] = await connection.query('INSERT INTO tag (name) VALUES (?)', [name]);
+        const [result] = await getConnection.query('INSERT INTO tag (name) VALUES (?)', [name]);
 
         // On retourne le tag nouvellement crée avec don ID généré automatiquement
-        const newTag = { id: result.inserId, name };
+        const newTag = { id: result.insertId, name };
         res.status(201).json(newTag); // 201 = Created
     } catch (err) {
         res.status(500).json({ error: 'Erreur serveur' });
@@ -71,8 +76,10 @@ router.put('/:id', async (req, res) => {
     if (!name) return res.status(400).json({ message: 'Nom requis' });
 
     try {
+        const getConnection = await connection();
         // On met à jour le tag dont l'id est fourni
-        const [result] = await connection.query('UPDATE tag SET name = ? WHERE id = ?', [name, req.params.id]);
+        const [result] = await getConnection.query('UPDATE tag SET name = ? WHERE idTag = ?', [name, req.params.id]);
+
 
         if (result.affectedRows === 0) {
             // Aucun tag mis à jour : l'ID n'existe pas
@@ -91,8 +98,9 @@ router.put('/:id', async (req, res) => {
 
 router.delete('/:id', async (req, res) => {
     try {
+        const getConnection = await connection();
         // Suppression du tag avec l'ID donné
-        const [result] = await connection.query('DELETE FROM tag WHERE id = ?', [req.params.id]);
+        const [result] = await getConnection.query('DELETE FROM tag WHERE idTag = ?', [req.params.id]);
 
         if (result.affectedRows === 0) {
             // Aucun tag supprimé = ID non trouvé
