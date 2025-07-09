@@ -1,16 +1,15 @@
-console.log('APP DEMARRÉ');
-
 // Importation des librairies (packages)
 const express = require('express');
 // const cors = require('cors')
-const index = require('./routes/index.js');
+const article = require('./routes/article.js');
 const tag = require('./routes/tag.js');
 const register = require('./routes/auth/register.js');
+const login = require('./routes/auth/login.js');
+const logout = require('./routes/auth/logout.js');
 const connection = require('./services/connection.js');
 // const cookieParser = require('cookie-parser')
 // const mysql = require('mysql2');
 require('dotenv').config();
-
 
 
 
@@ -28,13 +27,16 @@ const app = express();
 // Middleware pour parser le JSON dans le body
 app.use(express.json());
 
-// Importer la route user
-app.use('', index)
+
+const cookieParser = require('cookie-parser');
+app.use(cookieParser());
+
+// Importer les routes
+app.use('/article', article)
 
 app.use('/tag', tag)
 
-app.use('/auth', register)
-
+app.use('/auth', register, login, logout)
 
 connection();
 // Démarrer le serveur sur le port 4000

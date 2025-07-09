@@ -1,5 +1,3 @@
-console.log('ROUTER FICHIER CHARGÉ');
-
 const express = require('express');
 const router = express.Router();
 const connection = require('../services/connection.js');
@@ -8,11 +6,9 @@ const connection = require('../services/connection.js');
 // Récupérer un tag par son ID
 
 router.get('/:id', async (req, res) => {
-    console.log('Hello');
 
     try {
         const getConnection = await connection();
-        console.log('Bonjour')
         // Requête SQL avec un paramètre (sécurisé avec ?)
         const [rows] = await getConnection.query('SELECT * FROM tag WHERE idTag = ?', [req.params.id]);
 
@@ -26,7 +22,6 @@ router.get('/:id', async (req, res) => {
         res.status(500).json({ error: 'Erreur serveur' });
     }
 });
-
 
 
 // Récupérer tous les tags
