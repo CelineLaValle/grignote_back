@@ -87,5 +87,25 @@ router.put('/:id', async (req, res) => {
     }
 });
 
+// Supprimer un article par ID
+
+router.delete('/:id', async (req, res) => {
+    try {
+        const getConnection = await connection();
+        // Suppression de l'article avec l'ID donné
+        const [result] = await getConnection.query('DELETE FROM article WHERE idArticle = ?', [req.params.id]);
+
+        if (result.affectedRows === 0) {
+            // Aucun article supprimé = ID non trouvé
+            return res.status(404).json({ message: 'Article non trouvé' });
+        }
+
+        // Suppression réussie, pas besoin de contenu en retour
+        res.status(204).send(); // 204 = No Content
+    } catch (err) {
+        res.status(500).json({ error: 'Erreur serveur' });
+    }
+});
+
 
 module.exports = router

@@ -3,6 +3,7 @@ const express = require('express');
 // const cors = require('cors')
 const article = require('./routes/article.js');
 const tag = require('./routes/tag.js');
+const user = require('./routes/user.js');
 const register = require('./routes/auth/register.js');
 const login = require('./routes/auth/login.js');
 const logout = require('./routes/auth/logout.js');
@@ -35,6 +36,8 @@ app.use(cookieParser());
 app.use('/article', article)
 
 app.use('/tag', tag)
+
+app.use('/user', user)
 
 app.use('/auth', register, login, logout)
 
