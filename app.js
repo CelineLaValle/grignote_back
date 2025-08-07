@@ -1,50 +1,57 @@
-// Importation des librairies (packages)
 const express = require('express');
-// const cors = require('cors')
+const cookieParser = require('cookie-parser');
+const cors = require('cors');
+require('dotenv').config();
+
 const article = require('./routes/article.js');
 const tag = require('./routes/tag.js');
+const comment = require('./routes/comment.js');
 const user = require('./routes/user.js');
 const register = require('./routes/auth/register.js');
 const login = require('./routes/auth/login.js');
 const logout = require('./routes/auth/logout.js');
 const connection = require('./services/connection.js');
-// const cookieParser = require('cookie-parser')
-// const mysql = require('mysql2');
-require('dotenv').config();
-
-
-
-
-// connection.query(
-//     'SELECT * FROM tag', 
-//     function (err, results, fields) {
-//         console.log(results);
-
-//     }
-// )
-
 
 const app = express();
-// Middleware pour parser le JSON dans le body
+
+// Configurez CORS pour autoriser les requêtes avec des informations d'identification
+const corsOptions = {
+  origin: 'http://localhost:3000', // Remplacez par l'origine de votre application frontend
+  credentials: true, // Autorisez les requêtes avec des informations d'identification
+};
+
+app.use(cors(corsOptions));
+
+
+// Middleware pour parser les données JSON
 app.use(express.json());
 
-
-const cookieParser = require('cookie-parser');
+// Middleware pour parser les cookies
 app.use(cookieParser());
 
-// Importer les routes
-app.use('/article', article)
+// Servir les fichiers statiques du dossier "uploads"
+app.use('/uploads', express.static('uploads'));
 
-app.use('/tag', tag)
+// Routes principales
+app.use('/article', article);
+app.use('/tag', tag);
+app.use('/comment', comment);
+app.use('/user', user);
 
-app.use('/user', user)
+// Routes d'authentification (à séparer pour éviter les conflits)
+app.use('/auth/register', register);
+app.use('/auth/login', login);
+app.use('/auth/logout', logout);
 
-app.use('/auth', register, login, logout)
-
+// Connexion à la base de données
 connection();
-// Démarrer le serveur sur le port 4000
+
+app.use((req, res, next) => {
+    console.log(`➡️ Requête reçue : ${req.method} ${req.originalUrl}`);
+    next();
+});
+
+// Lancement du serveur
 app.listen(4000, () => {
     console.log('Serveur démarré sur le port 4000');
-})
-
-
+});

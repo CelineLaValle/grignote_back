@@ -16,6 +16,23 @@ router.get('/', async (req, res) => {
     }
 });
 
+// Obtenir un utilisateur par son ID
+router.get('/:id', async (req, res) => {
+    try {
+        const getConnection = await connection();
+        const [rows] = await getConnection.query('SELECT * FROM user WHERE idUser = ?', [req.params.id]);
+
+        if (rows.length === 0) {
+            return res.status(404).json({ message: 'Utilisateur non trouvé' });
+        }
+
+        res.json(rows[0]); // Renvoie l'utilisateur trouvé
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Erreur serveur' });
+    }
+});
+
 // Modifier un utilisateur
 
 router.put('/:id', async (req, res) => {

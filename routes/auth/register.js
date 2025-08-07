@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs'); // Pour hacher les mots de passe
 const connection = require('../../services/connection.js');
 
 
-router.post('/register', async (req, res) => {
+router.post('/', async (req, res) => {
     const {pseudo, email, password, avatar} = req.body;
 
     // Vérifie que les champs sont fournis
@@ -31,7 +31,7 @@ router.post('/register', async (req, res) => {
         const [result] = await getConnection.query('INSERT INTO user (pseudo, email, password, avatar, role) VALUES (?, ?, ?, ?, ?)', [pseudo, email, hashedPassword, avatar || null, role]);
 
         res.status(201).json({message: 'Utilisateur inscrit', userId: result.insertId});
-    } catch {
+    } catch (err) {
         console.error(err);
         res.status(500).json({error: 'Erreur serveur'});
     }

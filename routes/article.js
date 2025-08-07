@@ -2,12 +2,32 @@ const express = require('express');
 const router = express.Router();
 // const app = express();
 const connection = require('../services/connection.js');
+const multer = require('multer');
+const path = require('path');
+
+
+// Définition de l'endroit où seront stockées les images
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        // Ici, tous les fichiers seront enregistrés dans le dossier 'uploads'
+        cb(null, 'uploads/')
+    },
+    filename: function (req, file, cb) {
+        // On renomme le fichier pour éviter les conflits : DateActuelle-NomOriginal
+        const uniqueName = Date.now() + '-' + file.originalname;
+        cb(null, uniqueName);
+    }
+});
+
+// Initialisation de multer avec ce stockage
+const upload = multer({ storage });
+
 
 
 // Récupérer un article par son ID
 
 router.get('/:id', async (req, res) => {
-    
+
     try {
         const getConnection = await connection();
         // Requête SQL avec un paramètre (sécurisé avec ?)
@@ -39,9 +59,15 @@ router.get('/', async (req, res) => {
 
 // Créer un nouvel article
 
-router.post('/', async (req, res) => {
-    const { title, ingredient, content, category, image, idUser } = req.body;
+router.post('/', upload.single('image'), async (req, res) => {
+    console.log('BODY:', req.body);
+    console.log('FILE:', req.file);
 
+    const { title, ingredient, content, category, idUser } = req.body;
+
+
+    // L'image téléversée est dans req.file (si elle existe)
+    const image = req.file ? req.file.filename : null;
     // Validation : on vérifie que les champs sont rempli
     if (!title || !ingredient || !content || !category || !idUser) return res.status(400).json({ message: 'Champs requis' });
 
@@ -55,7 +81,7 @@ router.post('/', async (req, res) => {
         res.status(201).json(newArticle); // 201 = Created
     } catch (err) {
         // res.status(500).json({ error: 'Erreur serveur' });
-            res.status(500).json({ error: err.message });
+        res.status(500).json({ error: err.message });
     }
 });
 
@@ -70,7 +96,7 @@ router.put('/:id', async (req, res) => {
     try {
         const getConnection = await connection();
         // On met à jour l'article dont l'id est fourni
-        const [result] = await getConnection.query( 'UPDATE article SET title = ?, ingredient = ?, content = ?, category = ?, image = ? WHERE idArticle = ?',
+        const [result] = await getConnection.query('UPDATE article SET title = ?, ingredient = ?, content = ?, category = ?, image = ? WHERE idArticle = ?',
             [title, ingredient, content, category, image || null, req.params.id]
         );
 

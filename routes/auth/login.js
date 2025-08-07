@@ -4,8 +4,9 @@ const bcrypt = require('bcryptjs'); // Pour comparer les mots de passe hachés
 const jwt = require('jsonwebtoken'); // Pour créer un token
 const connection = require('../../services/connection');
 
-router.post('/login', async (req, res) => {
+router.post('/', async (req, res) => {
     const { email, password } = req.body;
+    console.log('Login attempt with email:', email);
 
     // Vérifie que les champs sont fournis
     if (!email || !password) {
@@ -17,7 +18,7 @@ router.post('/login', async (req, res) => {
 
         // Cherche l'utilisateur par email
         const [users] = await getConnection.query('SELECT * FROM user WHERE email = ?', [email]);
-
+        console.log('Users found:', users);
         if (users.length === 0) {
             return res.status(401).json({ message: 'Email ou mot de passe incorrect' });
         }
@@ -27,6 +28,7 @@ router.post('/login', async (req, res) => {
         // Compare le mot de passe donné avec celui de la base
         const passwordMatch = await bcrypt.compare(password, user.password);
         if (!passwordMatch) {
+            console.log('Password match:', passwordMatch);
             return res.status(401).json({ message: 'Email ou mot de passe incorrect' });
         }
 
@@ -38,14 +40,14 @@ router.post('/login', async (req, res) => {
         // Crée un Token JWT
         const token = jwt.sign(
             {
-                id: user.id,
+                idUser: user.idUser,
                 email: user.email,
                 role: user.role
             },
             process.env.JWT_SECRET,
             { expiresIn: '2h' }
         );
-
+        console.log('Token generated:', token); 
         // Envoie le token dans un cookie HTTP-only
         res.cookie('token', token, {
             httpOnly: true, // Protège contre les attaques XSS : JavaScript ne peut pas lire le cookie
@@ -54,7 +56,17 @@ router.post('/login', async (req, res) => {
             maxAge: 2 * 60 * 60 * 1000 // Durée de vie du cookie en millisecondes (2h ici)
         });
 
-        res.json({ message: 'Connexion réussie', token });
+        res.json({
+            message: 'Connexion réussie',
+            token,
+            user: {
+                idUser: user.idUser,
+                pseudo: user.pseudo,
+                email: user.email,
+                role: user.role
+            }
+        });
+
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Erreur serveur' });
