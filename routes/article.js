@@ -23,6 +23,18 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 
+router.get('/user/:idUser', async (req, res) => {
+  const idUser = req.params.idUser;
+  try {
+    const getConnection = await connection();
+    const [rows] = await getConnection.query('SELECT * FROM article WHERE idUser = ?', [idUser]);
+    res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
+
 
 // Récupérer un article par son ID
 
@@ -56,6 +68,7 @@ router.get('/', async (req, res) => {
         res.status(500).json({ error: 'Erreur serveur' });
     }
 });
+
 
 // Créer un nouvel article
 
