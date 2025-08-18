@@ -24,15 +24,15 @@ const upload = multer({ storage });
 
 
 router.get('/user/:idUser', async (req, res) => {
-  const idUser = req.params.idUser;
-  try {
-    const getConnection = await connection();
-    const [rows] = await getConnection.query('SELECT * FROM article WHERE idUser = ?', [idUser]);
-    res.json(rows);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Erreur serveur' });
-  }
+    const idUser = req.params.idUser;
+    try {
+        const getConnection = await connection();
+        const [rows] = await getConnection.query('SELECT * FROM article WHERE idUser = ?', [idUser]);
+        res.json(rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Erreur serveur' });
+    }
 });
 
 
@@ -77,6 +77,7 @@ router.post('/', upload.single('image'), async (req, res) => {
     console.log('FILE:', req.file);
 
     const { title, ingredient, content, category, idUser } = req.body;
+    console.log('BODY:', req.body);
 
 
     // L'image téléversée est dans req.file (si elle existe)
@@ -93,6 +94,7 @@ router.post('/', upload.single('image'), async (req, res) => {
         const newArticle = { id: result.insertId, title, ingredient, content, category, image, idUser };
         res.status(201).json(newArticle); // 201 = Created
     } catch (err) {
+        console.error('Erreur SQL:', err);
         // res.status(500).json({ error: 'Erreur serveur' });
         res.status(500).json({ error: err.message });
     }
