@@ -5,16 +5,40 @@ const connection = require('../services/connection.js');
 
 // Récupérer toutes les catégories distinctes
 router.get('/', async (req, res) => {
-    try {
-        const getConnection = await connection();
-        const [rows] = await getConnection.query('SELECT DISTINCT category FROM article');
-        // On renvoie seulement un tableau de noms
-        const categories = rows.map(row => row.category);
-        res.json(categories);
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'Erreur serveur' });
-    }
+  try {
+    const getConnection = await connection();
+    const [rows] = await getConnection.query("SHOW COLUMNS FROM article LIKE 'category'");
+
+    if (rows.length === 0) return res.json([]);
+
+    // Le type est quelque chose comme "enum('Entrée','Plat','Dessert')"
+    const enumString = rows[0].Type;
+    const categories = enumString
+      .replace("enum(", "")
+      .replace(")", "")
+      .split(",")
+      .map(v => v.replace(/'/g, "")); // on enlève les quotes
+
+    res.json(categories);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
 });
 
+
 module.exports = router;
+
+
+// router.get('/', async (req, res) => {
+//     try {
+//         const getConnection = await connection();
+//         const [rows] = await getConnection.query("SHOW COLUMNS FROM article LIKE 'category'");
+//         // On renvoie seulement un tableau de noms
+//         const categories = rows.map(row => row.category);
+//         res.json(categories);
+//     } catch (err) {
+//         console.error(err);
+//         res.status(500).json({ error: 'Erreur serveur' });
+//     }
+// });

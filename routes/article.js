@@ -4,6 +4,21 @@ const router = express.Router();
 const connection = require('../services/connection.js');
 const multer = require('multer');
 const path = require('path');
+const jwt = require('jsonwebtoken');
+
+// Middleware d'authentification
+function authMiddleware(req, res, next) {
+    const token = req.cookies.token;
+    if (!token) return res.status(401).json({ message: 'Non authentifié' });
+
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        req.user = decoded; // injecte l’utilisateur dans la requête
+        next();
+    } catch (err) {
+        return res.status(401).json({ message: 'Token invalide' });
+    }
+}
 
 
 // Définition de l'endroit où seront stockées les images
@@ -50,7 +65,18 @@ router.get('/:id', async (req, res) => {
             return res.status(404).json({ message: 'Article non trouvé' });
         }
 
-        res.json(rows[0]); // On retourne l'article trouvé
+        const article = rows[0];
+
+        // Récupérer les tags associés à cet article
+        const [tags] = await getConnection.query(
+            'SELECT t.idTag, t.name FROM tag t JOIN tag_article ta ON t.idTag = ta.idTag WHERE ta.idArticle = ?',
+            [req.params.id]
+        );
+
+        // Ajouter les tags à l'objet article
+        article.tags = tags;
+
+        res.json(article);
     } catch (err) {
         res.status(500).json({ error: 'Erreur serveur' });
     }
@@ -92,6 +118,18 @@ router.post('/', upload.single('image'), async (req, res) => {
 
         // On retourne l'article nouvellement crée avec don ID généré automatiquement
         const newArticle = { id: result.insertId, title, ingredient, content, category, image, idUser };
+        // Si des tags sont envoyés
+        if (req.body.tags) {
+            const tagIds = JSON.parse(req.body.tags); // tableau d'IDs de tags
+            if (tagIds.length > 0) {
+                const values = tagIds.map(tagId => [tagId, result.insertId]);
+                await getConnection.query(
+                    'INSERT INTO tag_article (idTag, idArticle) VALUES ?',
+                    [values]
+                );
+            }
+        }
+
         res.status(201).json(newArticle); // 201 = Created
     } catch (err) {
         console.error('Erreur SQL:', err);
@@ -102,44 +140,68 @@ router.post('/', upload.single('image'), async (req, res) => {
 
 // Modifier un article existant
 
-router.put('/:id', async (req, res) => {
-    const { title, ingredient, content, category, image } = req.body;
+router.put('/:id', authMiddleware, upload.single('image'), async (req, res) => {
+    const { title, ingredient, content, category } = req.body;
+    const image = req.file ? req.file.filename : null;
 
     // Validation
     if (!title || !ingredient || !content || !category) return res.status(400).json({ message: 'Champs requis' });
 
     try {
         const getConnection = await connection();
-        // On met à jour l'article dont l'id est fourni
-        const [result] = await getConnection.query('UPDATE article SET title = ?, ingredient = ?, content = ?, category = ?, image = ? WHERE idArticle = ?',
-            [title, ingredient, content, category, image || null, req.params.id]
-        );
 
+        // Récupérer l'article existant
+        const [rows] = await getConnection.query('SELECT * FROM article WHERE idArticle = ?', [req.params.id]);
+        const article = rows[0];
 
-        if (result.affectedRows === 0) {
-            // Aucun article mis à jour : l'ID n'existe pas
+        if (!article) {
             return res.status(404).json({ message: 'Article non trouvé' });
         }
+
+        // Vérifier si auteur ou admin
+        if (req.user.role !== 'admin' && article.idUser !== req.user.idUser) {
+            return res.status(403).json({ message: 'Accès interdit' });
+        }
+
+        // Mise à jour
+        await getConnection.query(
+            'UPDATE article SET title = ?, ingredient = ?, content = ?, category = ?, image = ? WHERE idArticle = ?',
+            [title, ingredient, content, category, image || article.image, req.params.id]
+        );
 
         // On retourne l'article modifié (nouvelle valeur)
         res.json({ id: parseInt(req.params.id), title, ingredient, content, category, image });
     } catch (err) {
+        console.error(err);
         res.status(500).json({ error: 'Erreur serveur' });
     }
 });
 
 // Supprimer un article par ID
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', authMiddleware, async (req, res) => {
     try {
         const getConnection = await connection();
+
+        // Vérifier si l'article existe
+        const [rows] = await getConnection.query('SELECT * FROM article WHERE idArticle = ?', [req.params.id]);
+        const article = rows[0];
+
         // Suppression de l'article avec l'ID donné
         const [result] = await getConnection.query('DELETE FROM article WHERE idArticle = ?', [req.params.id]);
 
-        if (result.affectedRows === 0) {
+        if (!article) {
             // Aucun article supprimé = ID non trouvé
             return res.status(404).json({ message: 'Article non trouvé' });
         }
+
+        // Vérifier si auteur ou admin
+        if (req.user.role !== 'admin' && article.idUser !== req.user.idUser) {
+            return res.status(403).json({ message: 'Accès interdit' });
+        }
+
+        await getConnection.query('DELETE FROM article WHERE idArticle = ?', [req.params.id]);
+        res.status(204).send();
 
         // Suppression réussie, pas besoin de contenu en retour
         res.status(204).send(); // 204 = No Content
