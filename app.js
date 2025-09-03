@@ -8,6 +8,7 @@ const tag = require('./routes/tag.js');
 const comment = require('./routes/comment.js');
 const user = require('./routes/user.js');
 const category = require('./routes/category.js');
+const favori = require("./routes/favori.js");
 const register = require('./routes/auth/register.js');
 const login = require('./routes/auth/login.js');
 const logout = require('./routes/auth/logout.js');
@@ -46,13 +47,14 @@ app.use('/tag', tag);
 app.use('/comment', comment);
 app.use('/user', user);
 app.use('/category', category);
+app.use('/favori', favori);
 
 
 // Connexion à la base de données
 connection();
 
 app.use((req, res, next) => {
-    console.log(`➡️ Requête reçue : ${req.method} ${req.originalUrl}`);
+    console.log(`Requête reçue : ${req.method} ${req.originalUrl}`);
     next();
 });
 

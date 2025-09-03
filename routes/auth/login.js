@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs'); // Pour comparer les mots de passe hachés
 const jwt = require('jsonwebtoken'); // Pour créer un token
 const connection = require('../../services/connection');
 
+
 router.post('/', async (req, res) => {
     const { email, password } = req.body;
     console.log('Login attempt with email:', email);
@@ -48,7 +49,7 @@ router.post('/', async (req, res) => {
             process.env.JWT_SECRET,
             { expiresIn: '2h' }
         );
-        console.log('Token generated:', token); 
+        console.log('Token generated:', token);
         // Envoie le token dans un cookie HTTP-only
         res.cookie('token', token, {
             httpOnly: true, // Protège contre les attaques XSS : JavaScript ne peut pas lire le cookie

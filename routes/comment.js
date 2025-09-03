@@ -3,14 +3,15 @@ console.log("Router /comment chargé !");
 const express = require('express');
 const router = express.Router();
 const connection = require('../services/connection');
+const auth = require('../middleware/auth');
 
 
 // Ajouter un commentaire
 
-router.post('/', async (req, res) => {
-    console.log("Route POST /comment appelée");
+router.post('/', auth, async (req, res) => {
     // On récupère les champs depuis le body de la requête
-    const { idUser, idArticle, content } = req.body;
+    const { idArticle, content } = req.body;
+    const idUser = req.user.idUser;
 
     // Vérification des champs obligatoires
     if (!idUser || !idArticle || !content) {
