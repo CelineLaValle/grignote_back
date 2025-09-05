@@ -57,23 +57,57 @@ router.put('/:id', async (req, res) => {
 
 // Suspendre/Réactiver un utilisateur
 
-router.patch('/suspend/:id', async (req, res) => {
-    const { suspended } = req.body; // true ou false
+// router.patch('/suspend/:id', async (req, res) => {
+//     const { suspended } = req.body; // true ou false
 
+//     try {
+//         const getConnection = await connection();
+//         const [result] = await getConnection.query('UPDATE user SET suspended = ? WHERE idUser = ?', [suspended, req.params.id]);
+
+//         if (result.affectedRows === 0) {
+//             return res.status(404).json({ message: 'Utilisateur non trouvé' });
+//         }
+
+//         res.json({ message: 'Statut mis à jour' });
+
+//     } catch (err) {
+//         res.status(500).json({ error: 'Erreur serveur' });
+//     }
+// });
+
+// Suspendre/Réactiver un utilisateur (toggle)
+router.patch('/suspend/:id', async (req, res) => {
     try {
         const getConnection = await connection();
-        const [result] = await getConnection.query('UPDATE user SET suspended = ? WHERE idUser = ?', [suspended, req.params.id]);
 
-        if (result.affectedRows === 0) {
+        // Récupérer l'état actuel
+        const [rows] = await getConnection.query(
+            'SELECT suspended FROM user WHERE idUser = ?',
+            [req.params.id]
+        );
+
+        if (rows.length === 0) {
             return res.status(404).json({ message: 'Utilisateur non trouvé' });
         }
 
-        res.json({ message: 'Statut mis à jour' });
+        const currentStatus = Number(rows[0].suspended); // Convertir en nombre
+        const newStatus = currentStatus === 1 ? 0 : 1;
 
+        await getConnection.query(
+            'UPDATE user SET suspended = ? WHERE idUser = ?',
+            [newStatus, req.params.id]
+        );
+
+        res.json({
+            message: `Utilisateur ${newStatus ? "suspendu" : "réactivé"} avec succès`,
+            suspended: newStatus
+        });
     } catch (err) {
+        console.error(err);
         res.status(500).json({ error: 'Erreur serveur' });
     }
 });
+
 
 // Supprimer un utilisateur
 

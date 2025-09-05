@@ -25,6 +25,12 @@ router.post('/', async (req, res) => {
         }
 
         const user = users[0];
+        // console.log('Suspended value:', user.suspended, typeof user.suspended);
+
+        // Vérifier si l'utilisateur est suspendu
+        if (Number(user.suspended) === 1) {
+            return res.status(403).json({ message: "Votre compte est suspendu. Contactez un administrateur." });
+        }
 
         // Compare le mot de passe donné avec celui de la base
         const passwordMatch = await bcrypt.compare(password, user.password);
