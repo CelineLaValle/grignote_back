@@ -1,6 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const connection = require('../services/connection.js');
 
 
 // Récupérer un tag par son ID
@@ -8,7 +7,7 @@ const connection = require('../services/connection.js');
 router.get('/:id', async (req, res) => {
 
     try {
-        const getConnection = await connection();
+        const getConnection = app.locals.db;
         // Requête SQL avec un paramètre (sécurisé avec ?)
         const [rows] = await getConnection.query('SELECT * FROM tag WHERE idTag = ?', [req.params.id]);
 
@@ -28,7 +27,7 @@ router.get('/:id', async (req, res) => {
 
 router.get('/', async (req, res) => {
     try {
-        const getConnection = await connection();
+        const getConnection = app.locals.db;
         const [rows] = await getConnection.query('SELECT * FROM tag');
         res.json(rows);
     } catch (err) {
@@ -49,7 +48,7 @@ router.post('/', async (req, res) => {
     if (!name) return res.status(400).json({ message: 'Nom requis' });
 
     try {
-        const getConnection = await connection();
+        const getConnection = app.locals.db;
         // Requête pour insérer un nouveau tag dans la base
         const [result] = await getConnection.query('INSERT INTO tag (name) VALUES (?)', [name]);
 
@@ -71,7 +70,7 @@ router.put('/:id', async (req, res) => {
     if (!name) return res.status(400).json({ message: 'Nom requis' });
 
     try {
-        const getConnection = await connection();
+        const getConnection = app.locals.db;
         // On met à jour le tag dont l'id est fourni
         const [result] = await getConnection.query('UPDATE tag SET name = ? WHERE idTag = ?', [name, req.params.id]);
 
@@ -93,7 +92,7 @@ router.put('/:id', async (req, res) => {
 
 router.delete('/:id', async (req, res) => {
     try {
-        const getConnection = await connection();
+        const getConnection = app.locals.db;
         // Suppression du tag avec l'ID donné
         const [result] = await getConnection.query('DELETE FROM tag WHERE idTag = ?', [req.params.id]);
 

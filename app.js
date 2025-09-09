@@ -9,6 +9,7 @@ const comment = require('./routes/comment.js');
 const user = require('./routes/user.js');
 const category = require('./routes/category.js');
 const favori = require("./routes/favori.js");
+const verify = require('./routes/verify');
 const register = require('./routes/auth/register.js');
 const login = require('./routes/auth/login.js');
 const logout = require('./routes/auth/logout.js');
@@ -48,10 +49,16 @@ app.use('/comment', comment);
 app.use('/user', user);
 app.use('/category', category);
 app.use('/favori', favori);
+app.use('/verify', verify);
 
 
 // Connexion à la base de données
-connection();
+connection().then(conn => {
+    app.locals.db = conn;
+    console.log('Connecté à la base de données');
+}).catch(err => {
+    console.error('Erreur connexion DB:', err);
+});
 
 app.use((req, res, next) => {
     console.log(`Requête reçue : ${req.method} ${req.originalUrl}`);

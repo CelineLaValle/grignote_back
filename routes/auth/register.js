@@ -1,7 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs'); // Pour hacher les mots de passe
-const connection = require('../../services/connection.js');
+const sendVerificationMail = require('../../services/mailer'); // import du fichier mailer.js
+const { v4: uuidv4 } = require('uuid'); // pour générer le token
+
 
 
 router.post('/', async (req, res) => {
@@ -13,7 +15,7 @@ router.post('/', async (req, res) => {
     }
 
     try {
-        const getConnection = await connection();
+        const getConnection = app.locals.db;
 
         // Vérifie si l'utilisateur existe déjà
         const [existingUsers] = await getConnection.query('SELECT * FROM user WHERE email = ?', [email]);
@@ -29,6 +31,18 @@ router.post('/', async (req, res) => {
 
         // Enregistre l'utilisateur dans la base de données
         const [result] = await getConnection.query('INSERT INTO user (pseudo, email, password, avatar, role) VALUES (?, ?, ?, ?, ?)', [pseudo, email, hashedPassword, avatar || null, role]);
+
+          // Génère un token pour l'email
+        const verifyToken = uuidv4();
+
+        // Stocke le token dans la table user (ajoute d'abord la colonne verify_token si nécessaire)
+        await getConnection.query(
+            'UPDATE user SET verify_token = ? WHERE idUser = ?',
+            [verifyToken, result.insertId]
+        );
+
+        // Envoie le mail de confirmation
+        await sendVerificationMail(email, verifyToken);
 
         res.status(201).json({message: 'Utilisateur inscrit', userId: result.insertId});
     } catch (err) {

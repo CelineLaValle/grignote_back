@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs'); // Pour comparer les mots de passe hachés
 const jwt = require('jsonwebtoken'); // Pour créer un token
-const connection = require('../../services/connection');
 
 
 router.post('/', async (req, res) => {
@@ -15,7 +14,7 @@ router.post('/', async (req, res) => {
     }
 
     try {
-        const getConnection = await connection();
+        const getConnection = app.locals.db;
 
         // Cherche l'utilisateur par email
         const [users] = await getConnection.query('SELECT * FROM user WHERE email = ?', [email]);
@@ -25,7 +24,7 @@ router.post('/', async (req, res) => {
         }
 
         const user = users[0];
-        // console.log('Suspended value:', user.suspended, typeof user.suspended);
+        console.log('Suspended value:', user.suspended, user.suspended === 1, typeof user.suspended);
 
         // Vérifier si l'utilisateur est suspendu
         if (Number(user.suspended) === 1) {

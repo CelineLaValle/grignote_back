@@ -2,7 +2,6 @@ console.log("Router /comment chargé !");
 
 const express = require('express');
 const router = express.Router();
-const connection = require('../services/connection');
 const auth = require('../middleware/auth');
 
 
@@ -19,7 +18,7 @@ router.post('/', auth, async (req, res) => {
     }
 
     try {
-        const getConnection = await connection();
+        const getConnection = app.locals.db;
 
         // Insertion du commentaire dans la base de données
         const [result] = await getConnection.query(
@@ -40,7 +39,7 @@ router.get('/:idArticle', async (req, res) => {
     const { idArticle } = req.params; // On récupère l'ID de l'article depuis l'URL
 
     try {
-        const getConnection = await connection();
+        const getConnection = app.locals.db;
 
         // On récupère tous les commentaires liés à cet article (et on peut aussi récupérer le pseudo de l'utilisateur)
         const [comments] = await getConnection.query(

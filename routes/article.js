@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 // const app = express();
-const connection = require('../services/connection.js');
 const multer = require('multer');
 const path = require('path');
 const jwt = require('jsonwebtoken');
@@ -41,7 +40,7 @@ const upload = multer({ storage });
 router.get('/user/:idUser', async (req, res) => {
     const idUser = req.params.idUser;
     try {
-        const getConnection = await connection();
+        const getConnection = app.locals.db;
         const [rows] = await getConnection.query('SELECT * FROM article WHERE idUser = ?', [idUser]);
         res.json(rows);
     } catch (err) {
@@ -56,7 +55,7 @@ router.get('/user/:idUser', async (req, res) => {
 router.get('/:id', async (req, res) => {
 
     try {
-        const getConnection = await connection();
+        const getConnection = app.locals.db;
         // Requête SQL avec un paramètre (sécurisé avec ?)
         const [rows] = await getConnection.query('SELECT * FROM article WHERE idArticle = ?', [req.params.id]);
 
@@ -86,7 +85,7 @@ router.get('/:id', async (req, res) => {
 
 router.get('/', async (req, res) => {
     try {
-        const getConnection = await connection();
+        const getConnection = app.locals.db;
         const [rows] = await getConnection.query('SELECT * FROM article');
         res.json(rows);
     } catch (err) {
@@ -112,7 +111,7 @@ router.post('/', upload.single('image'), async (req, res) => {
     if (!title || !ingredient || !content || !category || !idUser) return res.status(400).json({ message: 'Champs requis' });
 
     try {
-        const getConnection = await connection();
+        const getConnection = app.locals.db;
         // Requête pour insérer un nouvel article dans la base
         const [result] = await getConnection.query('INSERT INTO article (title, ingredient, content, category, image, idUser) VALUES (?, ?, ?, ?, ?, ?)', [title, ingredient, content, category, image || null, idUser]);
 
@@ -148,7 +147,7 @@ router.put('/:id', authMiddleware, upload.single('image'), async (req, res) => {
     if (!title || !ingredient || !content || !category) return res.status(400).json({ message: 'Champs requis' });
 
     try {
-        const getConnection = await connection();
+        const getConnection = app.locals.db;
 
         // Récupérer l'article existant
         const [rows] = await getConnection.query('SELECT * FROM article WHERE idArticle = ?', [req.params.id]);
@@ -181,7 +180,7 @@ router.put('/:id', authMiddleware, upload.single('image'), async (req, res) => {
 
 router.delete('/:id', authMiddleware, async (req, res) => {
     try {
-        const getConnection = await connection();
+        const getConnection = app.locals.db;
 
         // Vérifier si l'article existe
         const [rows] = await getConnection.query('SELECT * FROM article WHERE idArticle = ?', [req.params.id]);
