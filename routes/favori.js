@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const auth = require('../middleware/auth');
+const pool = require('../services/connection');
+
 
 // Ajouter un favori
 router.post("/", auth, async (req, res) => {
@@ -11,9 +13,9 @@ router.post("/", auth, async (req, res) => {
     if (!idUser) return res.status(401).json({ error: "Non connecté" });
 
 
-    const getConnection = app.locals.db;
+
 // Utilisation de INSERT IGNORE pour éviter les doublons
-    await getConnection.query(
+    await pool.query(
       "INSERT IGNORE INTO favori (idUser, idArticle) VALUES (?, ?)",
       [idUser, idArticle]
     );
@@ -32,9 +34,9 @@ router.delete("/:idArticle", auth, async (req, res) => {
 
     if (!idUser) return res.status(401).json({ error: "Non connecté" });
 
- const getConnection = app.locals.db;
+
     // On supprime le favori dans la base
-    await getConnection.query(
+    await pool.query(
       "DELETE FROM favori WHERE idUser = ? AND idArticle = ?",
       [idUser, req.params.idArticle]
     );
@@ -53,9 +55,9 @@ router.get("/", auth, async (req, res) => {
 
     if (!idUser) return res.status(401).json({ error: "Non connecté" });
 
-     const getConnection = app.locals.db;
+
     // On récupère les infos des articles favoris en les joignant avec la table article
-    const [rows] = await getConnection.query(
+    const [rows] = await pool.query(
       `SELECT a.* 
        FROM favori f
        JOIN article a ON f.idArticle = a.idArticle

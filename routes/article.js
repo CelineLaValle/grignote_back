@@ -4,10 +4,13 @@ const router = express.Router();
 const multer = require('multer');
 const path = require('path');
 const jwt = require('jsonwebtoken');
+const pool = require('../services/connection');
+const { log } = require('console');
 
 // Middleware d'authentification
 function authMiddleware(req, res, next) {
     const token = req.cookies.token;
+    console.log('Token from cookies:', token);
     if (!token) return res.status(401).json({ message: 'Non authentifié' });
 
     try {
@@ -40,8 +43,7 @@ const upload = multer({ storage });
 router.get('/user/:idUser', async (req, res) => {
     const idUser = req.params.idUser;
     try {
-        const getConnection = app.locals.db;
-        const [rows] = await getConnection.query('SELECT * FROM article WHERE idUser = ?', [idUser]);
+        const [rows] = await pool.query('SELECT * FROM article WHERE idUser = ?', [idUser]);
         res.json(rows);
     } catch (err) {
         console.error(err);
@@ -55,9 +57,9 @@ router.get('/user/:idUser', async (req, res) => {
 router.get('/:id', async (req, res) => {
 
     try {
-        const getConnection = app.locals.db;
+        
         // Requête SQL avec un paramètre (sécurisé avec ?)
-        const [rows] = await getConnection.query('SELECT * FROM article WHERE idArticle = ?', [req.params.id]);
+        const [rows] = await pool.query('SELECT * FROM article WHERE idArticle = ?', [req.params.id]);
 
         if (rows.length === 0) {
             // Si aucun article trouvé avec cet ID, on retourne une erreur 404
@@ -67,7 +69,7 @@ router.get('/:id', async (req, res) => {
         const article = rows[0];
 
         // Récupérer les tags associés à cet article
-        const [tags] = await getConnection.query(
+        const [tags] = await pool.query(
             'SELECT t.idTag, t.name FROM tag t JOIN tag_article ta ON t.idTag = ta.idTag WHERE ta.idArticle = ?',
             [req.params.id]
         );
@@ -85,8 +87,8 @@ router.get('/:id', async (req, res) => {
 
 router.get('/', async (req, res) => {
     try {
-        const getConnection = app.locals.db;
-        const [rows] = await getConnection.query('SELECT * FROM article');
+        
+        const [rows] = await pool.query('SELECT * FROM article');
         res.json(rows);
     } catch (err) {
         console.error(err);
@@ -111,9 +113,9 @@ router.post('/', upload.single('image'), async (req, res) => {
     if (!title || !ingredient || !content || !category || !idUser) return res.status(400).json({ message: 'Champs requis' });
 
     try {
-        const getConnection = app.locals.db;
+        
         // Requête pour insérer un nouvel article dans la base
-        const [result] = await getConnection.query('INSERT INTO article (title, ingredient, content, category, image, idUser) VALUES (?, ?, ?, ?, ?, ?)', [title, ingredient, content, category, image || null, idUser]);
+        const [result] = await pool.query('INSERT INTO article (title, ingredient, content, category, image, idUser) VALUES (?, ?, ?, ?, ?, ?)', [title, ingredient, content, category, image || null, idUser]);
 
         // On retourne l'article nouvellement crée avec don ID généré automatiquement
         const newArticle = { id: result.insertId, title, ingredient, content, category, image, idUser };
@@ -122,7 +124,7 @@ router.post('/', upload.single('image'), async (req, res) => {
             const tagIds = JSON.parse(req.body.tags); // tableau d'IDs de tags
             if (tagIds.length > 0) {
                 const values = tagIds.map(tagId => [tagId, result.insertId]);
-                await getConnection.query(
+                await pool.query(
                     'INSERT INTO tag_article (idTag, idArticle) VALUES ?',
                     [values]
                 );
@@ -147,10 +149,10 @@ router.put('/:id', authMiddleware, upload.single('image'), async (req, res) => {
     if (!title || !ingredient || !content || !category) return res.status(400).json({ message: 'Champs requis' });
 
     try {
-        const getConnection = app.locals.db;
+        
 
         // Récupérer l'article existant
-        const [rows] = await getConnection.query('SELECT * FROM article WHERE idArticle = ?', [req.params.id]);
+        const [rows] = await pool.query('SELECT * FROM article WHERE idArticle = ?', [req.params.id]);
         const article = rows[0];
 
         if (!article) {
@@ -163,7 +165,7 @@ router.put('/:id', authMiddleware, upload.single('image'), async (req, res) => {
         }
 
         // Mise à jour
-        await getConnection.query(
+        await pool.query(
             'UPDATE article SET title = ?, ingredient = ?, content = ?, category = ?, image = ? WHERE idArticle = ?',
             [title, ingredient, content, category, image || article.image, req.params.id]
         );
@@ -180,18 +182,22 @@ router.put('/:id', authMiddleware, upload.single('image'), async (req, res) => {
 
 router.delete('/:id', authMiddleware, async (req, res) => {
     try {
-        const getConnection = app.locals.db;
+        const id = req.params.id;
 
         // Vérifier si l'article existe
-        const [rows] = await getConnection.query('SELECT * FROM article WHERE idArticle = ?', [req.params.id]);
+        const [rows] = await pool.query('SELECT * FROM article WHERE idArticle = ?', [id]);
         const article = rows[0];
 
-        // Suppression de l'article avec l'ID donné
-        const [result] = await getConnection.query('DELETE FROM article WHERE idArticle = ?', [req.params.id]);
-
         if (!article) {
-            // Aucun article supprimé = ID non trouvé
             return res.status(404).json({ message: 'Article non trouvé' });
+        }
+
+        // Vérifier l'auteur de l'article
+        const [userRows] = await pool.query('SELECT * FROM user WHERE idUser = ?', [article.idUser]);
+        const userArticle = userRows[0];
+
+        if (!userArticle) {
+            return res.status(404).json({ message: "Auteur de l'article non trouvé" });
         }
 
         // Vérifier si auteur ou admin
@@ -199,12 +205,18 @@ router.delete('/:id', authMiddleware, async (req, res) => {
             return res.status(403).json({ message: 'Accès interdit' });
         }
 
-        await getConnection.query('DELETE FROM article WHERE idArticle = ?', [req.params.id]);
+        // Supprimer les associations tags
+        await pool.query('DELETE FROM tag_article WHERE idArticle = ?', [id]);
+        // Supprimer les commentaires associés
+        await pool.query('DELETE FROM comment WHERE idArticle = ?', [id]);
+        // Supprimer les favoris associés
+        await pool.query('DELETE FROM favori WHERE idArticle = ?', [id]);
+        // Supprimer
+        await pool.query('DELETE FROM article WHERE idArticle = ?', [id]);
         res.status(204).send();
 
-        // Suppression réussie, pas besoin de contenu en retour
-        res.status(204).send(); // 204 = No Content
     } catch (err) {
+        console.error("Erreur delete :", err);
         res.status(500).json({ error: 'Erreur serveur' });
     }
 });

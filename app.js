@@ -52,14 +52,6 @@ app.use('/favori', favori);
 app.use('/verify', verify);
 
 
-// Connexion à la base de données
-connection().then(conn => {
-    app.locals.db = conn;
-    console.log('Connecté à la base de données');
-}).catch(err => {
-    console.error('Erreur connexion DB:', err);
-});
-
 app.use((req, res, next) => {
     console.log(`Requête reçue : ${req.method} ${req.originalUrl}`);
     next();

@@ -1,5 +1,7 @@
 const express = require('express');
 const router = express.Router();
+const pool = require('../services/connection');
+
 
 router.get('/', async (req, res) => {
     const token = req.query.token; // récupère ?token=xxxx dans l'URL
@@ -8,10 +10,10 @@ router.get('/', async (req, res) => {
     }
 
     try {
-        const getConnection = req.app.locals.db;
+
 
         // Cherche l'utilisateur avec ce token
-        const [users] = await getConnection.query(
+        const [users] = await pool.query(
             'SELECT * FROM user WHERE verify_token = ?',
             [token]
         );
@@ -23,7 +25,7 @@ router.get('/', async (req, res) => {
         const userId = users[0].idUser;
 
         // Active le compte et supprime le token
-        await getConnection.query(
+        await pool.query(
             'UPDATE user SET is_verified = 1, verify_token = NULL WHERE idUser = ?',
             [userId]
         );

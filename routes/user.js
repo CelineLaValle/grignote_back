@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const pool = require('../services/connection');
 
 
 // Récupérer tout les utilisateurs
@@ -7,8 +8,8 @@ const router = express.Router();
 router.get('/', async (req, res) => {
 
     try {
-        const getConnection = app.locals.db;
-        const [user] = await getConnection.query('SELECT * FROM user');
+        
+        const [user] = await pool.query('SELECT * FROM user');
         res.json(user);
     } catch (err) {
         res.status(500).json({ error: 'Erreur serveur' });
@@ -18,8 +19,8 @@ router.get('/', async (req, res) => {
 // Obtenir un utilisateur par son ID
 router.get('/:id', async (req, res) => {
     try {
-        const getConnection = app.locals.db;
-        const [rows] = await getConnection.query('SELECT * FROM user WHERE idUser = ?', [req.params.id]);
+        
+        const [rows] = await pool.query('SELECT * FROM user WHERE idUser = ?', [req.params.id]);
 
         if (rows.length === 0) {
             return res.status(404).json({ message: 'Utilisateur non trouvé' });
@@ -39,8 +40,8 @@ router.put('/:id', async (req, res) => {
 
     try {
 
-        const getConnection = app.locals.db;
-        const [result] = await getConnection.query('UPDATE user SET pseudo = ?, email = ?, role = ? WHERE idUser = ?', [pseudo, email, role, req.params.id]);
+        
+        const [result] = await pool.query('UPDATE user SET pseudo = ?, email = ?, role = ? WHERE idUser = ?', [pseudo, email, role, req.params.id]);
 
         if (result.affectedRows === 0) {
             return res.status(404).json({ message: 'Utilisateur non trouvé' });
@@ -60,8 +61,8 @@ router.put('/:id', async (req, res) => {
 //     const { suspended } = req.body; // true ou false
 
 //     try {
-//         const getConnection = app.locals.db;
-//         const [result] = await getConnection.query('UPDATE user SET suspended = ? WHERE idUser = ?', [suspended, req.params.id]);
+//         
+//         const [result] = await pool.query('UPDATE user SET suspended = ? WHERE idUser = ?', [suspended, req.params.id]);
 
 //         if (result.affectedRows === 0) {
 //             return res.status(404).json({ message: 'Utilisateur non trouvé' });
@@ -77,10 +78,10 @@ router.put('/:id', async (req, res) => {
 // Suspendre/Réactiver un utilisateur (toggle)
 router.patch('/suspend/:id', async (req, res) => {
     try {
-        const getConnection = app.locals.db;
+        
 
         // Récupérer l'état actuel
-        const [rows] = await getConnection.query(
+        const [rows] = await pool.query(
             'SELECT suspended FROM user WHERE idUser = ?',
             [req.params.id]
         );
@@ -92,7 +93,7 @@ router.patch('/suspend/:id', async (req, res) => {
         const currentStatus = Number(rows[0].suspended); // Convertir en nombre
         const newStatus = currentStatus === 1 ? 0 : 1;
 
-        await getConnection.query(
+        await pool.query(
             'UPDATE user SET suspended = ? WHERE idUser = ?',
             [newStatus, req.params.id]
         );
@@ -113,8 +114,8 @@ router.patch('/suspend/:id', async (req, res) => {
 router.delete('/:id', async (req, res) => {
 
     try {
-        const getConnection = app.locals.db;
-        const [result] = await getConnection.query('DELETE FROM user WHERE idUser = ?', [req.params.id]);
+        
+        const [result] = await pool.query('DELETE FROM user WHERE idUser = ?', [req.params.id]);
         if (result.affectedRows === 0) {
             return res.status(404).json({ message: 'Utilisateur non trouvé' });
         }

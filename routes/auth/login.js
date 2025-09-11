@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs'); // Pour comparer les mots de passe hachés
 const jwt = require('jsonwebtoken'); // Pour créer un token
-
+const pool = require('../../services/connection');
 
 router.post('/', async (req, res) => {
     const { email, password } = req.body;
@@ -14,10 +14,10 @@ router.post('/', async (req, res) => {
     }
 
     try {
-        const getConnection = app.locals.db;
+        // const pool = await connection();
 
         // Cherche l'utilisateur par email
-        const [users] = await getConnection.query('SELECT * FROM user WHERE email = ?', [email]);
+        const [users] = await pool.query('SELECT * FROM user WHERE email = ?', [email]);
         console.log('Users found:', users);
         if (users.length === 0) {
             return res.status(401).json({ message: 'Email ou mot de passe incorrect' });

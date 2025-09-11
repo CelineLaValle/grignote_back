@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
+
 router.post('/', (req, res) => {
     // On efface le cookie nommé "token" en le vidant
     res.clearCookie('token', {

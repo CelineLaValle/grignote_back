@@ -1,12 +1,13 @@
 const express = require('express');
 const router = express.Router();
+const pool = require('../services/connection');
+
 
 
 // Récupérer toutes les catégories distinctes
 router.get('/', async (req, res) => {
   try {
-    const getConnection = app.locals.db;
-    const [rows] = await getConnection.query("SHOW COLUMNS FROM article LIKE 'category'");
+    const [rows] = await pool.query("SHOW COLUMNS FROM article LIKE 'category'");
 
     if (rows.length === 0) return res.json([]);
 
@@ -31,8 +32,8 @@ module.exports = router;
 
 // router.get('/', async (req, res) => {
 //     try {
-//         const getConnection = app.locals.db;
-//         const [rows] = await getConnection.query("SHOW COLUMNS FROM article LIKE 'category'");
+//         const pool = app.locals.db;
+//         const [rows] = await pool.query("SHOW COLUMNS FROM article LIKE 'category'");
 //         // On renvoie seulement un tableau de noms
 //         const categories = rows.map(row => row.category);
 //         res.json(categories);

@@ -1,5 +1,7 @@
 const express = require('express');
 const router = express.Router();
+const pool = require('../services/connection');
+
 
 
 // Récupérer un tag par son ID
@@ -7,9 +9,8 @@ const router = express.Router();
 router.get('/:id', async (req, res) => {
 
     try {
-        const getConnection = app.locals.db;
         // Requête SQL avec un paramètre (sécurisé avec ?)
-        const [rows] = await getConnection.query('SELECT * FROM tag WHERE idTag = ?', [req.params.id]);
+        const [rows] = await pool.query('SELECT * FROM tag WHERE idTag = ?', [req.params.id]);
 
         if (rows.length === 0) {
             // Si aucun tag trouvé avec cet ID, on retourne une erreur 404
@@ -27,8 +28,7 @@ router.get('/:id', async (req, res) => {
 
 router.get('/', async (req, res) => {
     try {
-        const getConnection = app.locals.db;
-        const [rows] = await getConnection.query('SELECT * FROM tag');
+        const [rows] = await pool.query('SELECT * FROM tag');
         res.json(rows);
     } catch (err) {
         console.error(err);
@@ -48,9 +48,8 @@ router.post('/', async (req, res) => {
     if (!name) return res.status(400).json({ message: 'Nom requis' });
 
     try {
-        const getConnection = app.locals.db;
         // Requête pour insérer un nouveau tag dans la base
-        const [result] = await getConnection.query('INSERT INTO tag (name) VALUES (?)', [name]);
+        const [result] = await pool.query('INSERT INTO tag (name) VALUES (?)', [name]);
 
         // On retourne le tag nouvellement crée avec don ID généré automatiquement
         const newTag = { id: result.insertId, name };
@@ -70,9 +69,8 @@ router.put('/:id', async (req, res) => {
     if (!name) return res.status(400).json({ message: 'Nom requis' });
 
     try {
-        const getConnection = app.locals.db;
         // On met à jour le tag dont l'id est fourni
-        const [result] = await getConnection.query('UPDATE tag SET name = ? WHERE idTag = ?', [name, req.params.id]);
+        const [result] = await pool.query('UPDATE tag SET name = ? WHERE idTag = ?', [name, req.params.id]);
 
 
         if (result.affectedRows === 0) {
@@ -92,9 +90,8 @@ router.put('/:id', async (req, res) => {
 
 router.delete('/:id', async (req, res) => {
     try {
-        const getConnection = app.locals.db;
         // Suppression du tag avec l'ID donné
-        const [result] = await getConnection.query('DELETE FROM tag WHERE idTag = ?', [req.params.id]);
+        const [result] = await pool.query('DELETE FROM tag WHERE idTag = ?', [req.params.id]);
 
         if (result.affectedRows === 0) {
             // Aucun tag supprimé = ID non trouvé

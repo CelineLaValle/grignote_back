@@ -3,6 +3,8 @@ console.log("Router /comment chargé !");
 const express = require('express');
 const router = express.Router();
 const auth = require('../middleware/auth');
+const pool = require('../services/connection');
+
 
 
 // Ajouter un commentaire
@@ -18,10 +20,9 @@ router.post('/', auth, async (req, res) => {
     }
 
     try {
-        const getConnection = app.locals.db;
 
         // Insertion du commentaire dans la base de données
-        const [result] = await getConnection.query(
+        const [result] = await pool.query(
             'INSERT INTO comment (idUser, idArticle, content, date) VALUES (?, ?, ?, NOW())', [idUser, idArticle, content]
         );
 
@@ -39,10 +40,9 @@ router.get('/:idArticle', async (req, res) => {
     const { idArticle } = req.params; // On récupère l'ID de l'article depuis l'URL
 
     try {
-        const getConnection = app.locals.db;
 
         // On récupère tous les commentaires liés à cet article (et on peut aussi récupérer le pseudo de l'utilisateur)
-        const [comments] = await getConnection.query(
+        const [comments] = await pool.query(
             `SELECT c.idComment, c.content, c.date, u.pseudo
             FROM comment c
             JOIN user u ON u.idUser = c.idUser
