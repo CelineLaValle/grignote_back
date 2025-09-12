@@ -20,7 +20,7 @@ const sendVerificationMail = async (email, token) => {
     subject: "Confirme ton email",
     html: `
       <h2>Bienvenue sur le blog de recettes !</h2>
-      <p>Merci pour ton inscription. Pour activer ton compte, clique sur le lien ci-dessous :</p>
+      <p>Merci pour votre inscription. Pour activer votre compte, cliquez sur le lien ci-dessous :</p>
       <a href="${url}">Confirmer mon compte</a>
     `
   });

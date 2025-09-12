@@ -5,6 +5,7 @@ const pool = require('../services/connection');
 
 router.get('/', async (req, res) => {
     const token = req.query.token; // récupère ?token=xxxx dans l'URL
+    console.log("Token reçu:", token);
     if (!token) {
         return res.status(400).json({ message: 'Token manquant' });
     }
@@ -17,6 +18,7 @@ router.get('/', async (req, res) => {
             'SELECT * FROM user WHERE verify_token = ?',
             [token]
         );
+        console.log("Résultat SELECT:", users);
 
         if (users.length === 0) {
             return res.status(400).json({ message: 'Lien invalide ou expiré' });

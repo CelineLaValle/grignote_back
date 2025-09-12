@@ -9,7 +9,9 @@ const { v4: uuidv4 } = require('uuid'); // pour générer le token
 const pool = require('../../services/connection');
 
 router.post('/', async (req, res) => {
-    const { pseudo, email, password, avatar } = req.body;
+    console.log("Route /auth/register appelée !");
+    console.log("req.body =", req.body);
+    const { pseudo, email, password } = req.body;
 
     // Vérifie que les champs sont fournis
     if (!pseudo || !email || !password) {
@@ -32,7 +34,7 @@ router.post('/', async (req, res) => {
         const role = 'utilisateur';
 
         // Enregistre l'utilisateur dans la base de données
-        const [result] = await pool.query('INSERT INTO user (pseudo, email, password, avatar, role) VALUES (?, ?, ?, ?, ?)', [pseudo, email, hashedPassword, avatar || null, role]);
+        const [result] = await pool.query('INSERT INTO user (pseudo, email, password, role) VALUES (?, ?, ?, ?)', [pseudo, email, hashedPassword, role]);
 
         // Génère un token pour l'email
         const verifyToken = uuidv4();

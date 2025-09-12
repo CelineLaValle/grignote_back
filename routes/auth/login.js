@@ -31,6 +31,12 @@ router.post('/', async (req, res) => {
             return res.status(403).json({ message: "Votre compte est suspendu. Contactez un administrateur." });
         }
 
+        // Vérifie que l’utilisateur a confirmé son email
+        if (user.is_verified === 0) {
+            return res.status(403).json({ message: "Veuillez vérifier votre email avant de vous connecter." });
+        }
+
+
         // Compare le mot de passe donné avec celui de la base
         const passwordMatch = await bcrypt.compare(password, user.password);
         if (!passwordMatch) {
