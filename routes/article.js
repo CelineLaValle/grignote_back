@@ -57,7 +57,7 @@ router.get('/user/:idUser', async (req, res) => {
 router.get('/:id', async (req, res) => {
 
     try {
-        
+
         // Requête SQL avec un paramètre (sécurisé avec ?)
         const [rows] = await pool.query('SELECT * FROM article WHERE idArticle = ?', [req.params.id]);
 
@@ -83,15 +83,51 @@ router.get('/:id', async (req, res) => {
     }
 });
 
-// Récupérer tous les articles
 
+// Récupérer tous les articles avec leurs tags
 router.get('/', async (req, res) => {
     try {
-        
-        const [rows] = await pool.query('SELECT * FROM article');
-        res.json(rows);
+        // 1. Récupérer tous les articles (les plus récents en premier)
+        const [articles] = await pool.query('SELECT * FROM article ORDER BY date DESC, idArticle DESC');
+
+        // 2. Récupérer tous les tags avec leurs associations en une requête
+        const [tagAssociations] = await pool.query(`
+            SELECT 
+                ta.idArticle,
+                t.idTag,
+                t.name
+            FROM tag_article ta
+            JOIN tag t ON ta.idTag = t.idTag
+            ORDER BY ta.idArticle, t.name
+        `);
+
+        // 3. Organiser les tags par article
+        const tagsByArticle = {};
+        tagAssociations.forEach(association => {
+            if (!tagsByArticle[association.idArticle]) {
+                tagsByArticle[association.idArticle] = [];
+            }
+            tagsByArticle[association.idArticle].push({
+                idTag: association.idTag,
+                name: association.name
+            });
+        });
+
+        // 4. Ajouter les tags à chaque article
+        const articlesWithTags = articles.map(article => ({
+            ...article,
+            tags: tagsByArticle[article.idArticle] || []
+        }));
+
+        console.log('Articles avec tags:', articlesWithTags.map(a => ({
+            id: a.idArticle,
+            title: a.title,
+            tags: a.tags.map(t => t.name)
+        })));
+
+        res.json(articlesWithTags);
     } catch (err) {
-        console.error(err);
+        console.error('Erreur récupération articles:', err);
         res.status(500).json({ error: 'Erreur serveur' });
     }
 });
@@ -113,7 +149,7 @@ router.post('/', upload.single('image'), async (req, res) => {
     if (!title || !ingredient || !content || !category || !idUser) return res.status(400).json({ message: 'Champs requis' });
 
     try {
-        
+
         // Requête pour insérer un nouvel article dans la base
         const [result] = await pool.query('INSERT INTO article (title, ingredient, content, category, image, idUser) VALUES (?, ?, ?, ?, ?, ?)', [title, ingredient, content, category, image || null, idUser]);
 
@@ -149,7 +185,7 @@ router.put('/:id', authMiddleware, upload.single('image'), async (req, res) => {
     if (!title || !ingredient || !content || !category) return res.status(400).json({ message: 'Champs requis' });
 
     try {
-        
+
 
         // Récupérer l'article existant
         const [rows] = await pool.query('SELECT * FROM article WHERE idArticle = ?', [req.params.id]);
@@ -169,6 +205,21 @@ router.put('/:id', authMiddleware, upload.single('image'), async (req, res) => {
             'UPDATE article SET title = ?, ingredient = ?, content = ?, category = ?, image = ? WHERE idArticle = ?',
             [title, ingredient, content, category, image || article.image, req.params.id]
         );
+
+        // Supprimer les anciens tags de l'article
+        await pool.query('DELETE FROM tag_article WHERE idArticle = ?', [req.params.id]);
+
+        // Réinsérer les nouveaux si envoyés
+        if (req.body.tags) {
+            const tagIds = JSON.parse(req.body.tags);
+            if (tagIds.length > 0) {
+                const values = tagIds.map(tagId => [tagId, req.params.id]);
+                await pool.query(
+                    'INSERT INTO tag_article (idTag, idArticle) VALUES ?',
+                    [values]
+                );
+            }
+        }
 
         // On retourne l'article modifié (nouvelle valeur)
         res.json({ id: parseInt(req.params.id), title, ingredient, content, category, image });

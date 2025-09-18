@@ -52,7 +52,7 @@ router.post('/', async (req, res) => {
         const [result] = await pool.query('INSERT INTO tag (name) VALUES (?)', [name]);
 
         // On retourne le tag nouvellement crée avec don ID généré automatiquement
-        const newTag = { id: result.insertId, name };
+        const newTag = { idTag: result.insertId, name };
         res.status(201).json(newTag); // 201 = Created
     } catch (err) {
         res.status(500).json({ error: 'Erreur serveur' });
