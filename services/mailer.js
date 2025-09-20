@@ -2,10 +2,10 @@ const nodemailer = require('nodemailer');
 
 // Configuration du transporteur Gmail
 const transporter = nodemailer.createTransport({
-  service: 'smtp.gmail.com:587',
+  service: 'gmail',
   auth: {
-    user: 'kayaggan@gmail.com',          // ton adresse Gmail
-    pass: 'mzzdflebpaycdobw',     // mot de passe d'application Gmail
+      user: process.env.GMAIL_USER,
+      pass: process.env.GMAIL_PASS,
   },
 });
 
@@ -15,7 +15,7 @@ const sendVerificationMail = async (email, token) => {
 
   try {
     let info = await transporter.sendMail({
-      from: '"Blog de Recettes 🍲" <kayaggan@gmail.com>', // ton adresse Gmail
+      from: `"Blog de Recettes 🍲" <${process.env.GMAIL_USER}>`, // ton adresse Gmail
       to: email,
       subject: 'Confirme ton email',
       html: `
@@ -25,9 +25,9 @@ const sendVerificationMail = async (email, token) => {
       `,
     });
 
-    console.log('✅ Mail envoyé :', info.messageId);
+    console.log('✅ Mail envoyé avec succès :', info.messageId);
   } catch (error) {
-    console.error('❌ Erreur lors de l\'envoi du mail :', error);
+    console.error('❌ Erreur détaillée lors de l\'envoi du mail :');
   }
 };
 
