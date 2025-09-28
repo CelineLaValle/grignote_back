@@ -31,7 +31,6 @@ router.get('/', async (req, res) => {
         const [rows] = await pool.query('SELECT * FROM tag');
         res.json(rows);
     } catch (err) {
-        console.error(err);
         res.status(500).json({ error: 'Erreur serveur' });
     }
 });
@@ -40,8 +39,6 @@ router.get('/', async (req, res) => {
 // Créer un nouveau tag
 
 router.post('/', async (req, res) => {
-    console.log('ok');
-    console.log('BODY:', req.body);
     const { name } = req.body;
 
     // Validation : on vérifie que le nom est fourni

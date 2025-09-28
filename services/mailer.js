@@ -15,13 +15,13 @@ const sendVerificationMail = async (email, token) => {
 
   try {
     let info = await transporter.sendMail({
-      from: `"Blog de Recettes 🍲" <${process.env.GMAIL_USER}>`, // ton adresse Gmail
+      from: `'Blog de Recettes 🍲' <${process.env.GMAIL_USER}>`, // ton adresse Gmail
       to: email,
       subject: 'Confirme ton email',
       html: `
         <h2>Bienvenue sur le blog de recettes !</h2>
         <p>Merci pour votre inscription. Pour activer votre compte, cliquez sur le lien ci-dessous :</p>
-        <a href="${url}">Confirmer mon compte</a>
+        <a href='${url}'>Confirmer mon compte</a>
       `,
     });
 

@@ -8,7 +8,7 @@ const tag = require('./routes/tag.js');
 const comment = require('./routes/comment.js');
 const user = require('./routes/user.js');
 const category = require('./routes/category.js');
-const favori = require("./routes/favori.js");
+const favori = require('./routes/favori.js');
 const verify = require('./routes/verify');
 const register = require('./routes/auth/register.js');
 const login = require('./routes/auth/login.js');
@@ -33,7 +33,7 @@ app.use(express.json());
 // Middleware pour parser les cookies
 app.use(cookieParser());
 
-// Servir les fichiers statiques du dossier "uploads"
+// Servir les fichiers statiques du dossier 'uploads'
 app.use('/uploads', express.static('uploads'));
 
 // Routes d'authentification (à séparer pour éviter les conflits)
@@ -53,7 +53,6 @@ app.use('/verify', verify);
 
 
 app.use((req, res, next) => {
-    console.log(`Requête reçue : ${req.method} ${req.originalUrl}`);
     next();
 });
 

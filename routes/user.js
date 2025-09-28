@@ -28,7 +28,6 @@ router.get('/:id', async (req, res) => {
 
         res.json(rows[0]); // Renvoie l'utilisateur trouvé
     } catch (err) {
-        console.error(err);
         res.status(500).json({ error: 'Erreur serveur' });
     }
 });
@@ -99,7 +98,7 @@ router.patch('/suspend/:id', async (req, res) => {
         );
 
         res.json({
-            message: `Utilisateur ${newStatus ? "suspendu" : "réactivé"} avec succès`,
+            message: `Utilisateur ${newStatus ? 'suspendu' : 'réactivé'} avec succès`,
             suspended: newStatus
         });
     } catch (err) {

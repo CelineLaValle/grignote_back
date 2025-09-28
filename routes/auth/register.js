@@ -9,8 +9,6 @@ const { v4: uuidv4 } = require('uuid'); // pour générer le token
 const pool = require('../../services/connection');
 
 router.post('/', async (req, res) => {
-    console.log("Route /auth/register appelée !");
-    console.log("req.body =", req.body);
     const { pseudo, email, password } = req.body;
 
     // Vérifie que les champs sont fournis
@@ -50,7 +48,6 @@ router.post('/', async (req, res) => {
 
         res.status(201).json({ message: 'Utilisateur inscrit', userId: result.insertId });
     } catch (err) {
-        console.error(err);
         res.status(500).json({ error: 'Erreur serveur' });
     }
 });

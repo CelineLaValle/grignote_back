@@ -5,18 +5,16 @@ const multer = require('multer');
 const path = require('path');
 const jwt = require('jsonwebtoken');
 const pool = require('../services/connection');
-const { log } = require('console');
 
 // Middleware d'authentification
 function authMiddleware(req, res, next) {
     const token = req.cookies.token;
-    console.log('Token from cookies:', token);
     if (!token) return res.status(401).json({ message: 'Non authentifié' });
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        req.user = decoded; // injecte l’utilisateur dans la requête
-        next();
+        req.user = decoded;
+        next(); // Token valide, on continue
     } catch (err) {
         return res.status(401).json({ message: 'Token invalide' });
     }
@@ -46,7 +44,6 @@ router.get('/user/:idUser', async (req, res) => {
         const [rows] = await pool.query('SELECT * FROM article WHERE idUser = ?', [idUser]);
         res.json(rows);
     } catch (err) {
-        console.error(err);
         res.status(500).json({ error: 'Erreur serveur' });
     }
 });
@@ -248,7 +245,7 @@ router.delete('/:id', authMiddleware, async (req, res) => {
         const userArticle = userRows[0];
 
         if (!userArticle) {
-            return res.status(404).json({ message: "Auteur de l'article non trouvé" });
+            return res.status(404).json({ message: 'Auteur de l’article non trouvé' });
         }
 
         // Vérifier si auteur ou admin
@@ -267,7 +264,7 @@ router.delete('/:id', authMiddleware, async (req, res) => {
         res.status(204).send();
 
     } catch (err) {
-        console.error("Erreur delete :", err);
+        console.error('Erreur delete :', err);
         res.status(500).json({ error: 'Erreur serveur' });
     }
 });

@@ -1,5 +1,3 @@
-console.log("Router /comment chargé !");
-
 const express = require('express');
 const router = express.Router();
 const auth = require('../middleware/auth');
@@ -29,7 +27,6 @@ router.post('/', auth, async (req, res) => {
         // Réponse au client avec l'ID du commentaire crée
         res.status(201).json({ message: 'Commentaire ajouté', idComment: result.insertId });
     } catch (err) {
-        console.error('Erreur lors de l\'ajout du commentaire :', err);
         res.status(500).json({ error: 'Erreur serveur' });
     }
 });
@@ -53,7 +50,6 @@ router.get('/:idArticle', async (req, res) => {
         // On retourne la liste des commentaires au client
         res.json(comments);
     } catch (err) {
-        console.error('Erreur lors de la récupération des commentaires :', err);
         res.status(500).json({ error: 'Erreur serveur' });
     }
 });

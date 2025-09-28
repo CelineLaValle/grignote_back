@@ -6,11 +6,10 @@ const pool = require('../../services/connection');
 
 router.post('/', async (req, res) => {
     const { email, password } = req.body;
-    console.log('Login attempt with email:', email);
 
-    // Vérifie que les champs sont fournis
+    // Validation des champs
     if (!email || !password) {
-        return res.status(400).json({ message: 'Identifiants requis' });
+        return res.status(400).json({ message: 'Email et mot de passe requis' });
     }
 
     try {
@@ -18,29 +17,26 @@ router.post('/', async (req, res) => {
 
         // Cherche l'utilisateur par email
         const [users] = await pool.query('SELECT * FROM user WHERE email = ?', [email]);
-        console.log('Users found:', users);
         if (users.length === 0) {
             return res.status(401).json({ message: 'Email ou mot de passe incorrect' });
         }
 
         const user = users[0];
-        console.log('Suspended value:', user.suspended, user.suspended === 1, typeof user.suspended);
 
         // Vérifier si l'utilisateur est suspendu
         if (Number(user.suspended) === 1) {
-            return res.status(403).json({ message: "Votre compte est suspendu. Contactez un administrateur." });
+            return res.status(403).json({ message: 'Votre compte est suspendu. Contactez un administrateur.' });
         }
 
         // Vérifie que l’utilisateur a confirmé son email
         if (user.is_verified === 0) {
-            return res.status(403).json({ message: "Veuillez vérifier votre email avant de vous connecter." });
+            return res.status(403).json({ message: 'Veuillez vérifier votre email avant de vous connecter.' });
         }
 
 
         // Compare le mot de passe donné avec celui de la base
         const passwordMatch = await bcrypt.compare(password, user.password);
         if (!passwordMatch) {
-            console.log('Password match:', passwordMatch);
             return res.status(401).json({ message: 'Email ou mot de passe incorrect' });
         }
 
@@ -60,7 +56,6 @@ router.post('/', async (req, res) => {
             process.env.JWT_SECRET,
             { expiresIn: '2h' }
         );
-        console.log('Token generated:', token);
         // Envoie le token dans un cookie HTTP-only
         res.cookie('token', token, {
             httpOnly: true, // Protège contre les attaques XSS : JavaScript ne peut pas lire le cookie
@@ -81,7 +76,6 @@ router.post('/', async (req, res) => {
         });
 
     } catch (err) {
-        console.error(err);
         res.status(500).json({ error: 'Erreur serveur' });
     }
 });
