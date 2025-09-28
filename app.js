@@ -13,19 +13,18 @@ const verify = require('./routes/verify');
 const register = require('./routes/auth/register.js');
 const login = require('./routes/auth/login.js');
 const logout = require('./routes/auth/logout.js');
-const authMe = require('./routes/auth/me.js'); // Import de la route pour récupérer les infos utilisateur
+const authMe = require('./routes/auth/me.js');
 const connection = require('./services/connection.js');
 
 const app = express();
 
 // Configurez CORS pour autoriser les requêtes avec des informations d'identification
 const corsOptions = {
-  origin: 'http://localhost:3000', // Remplacez par l'origine de votre application frontend
+  origin: process.env.FRONTEND_URL || 'http://localhost:3000', // Utilise l'URL du frontend depuis les variables d'environnement
   credentials: true, // Autorisez les requêtes avec des informations d'identification
 };
 
 app.use(cors(corsOptions));
-
 
 // Middleware pour parser les données JSON
 app.use(express.json());
@@ -50,7 +49,6 @@ app.use('/user', user);
 app.use('/category', category);
 app.use('/favori', favori);
 app.use('/verify', verify);
-
 
 app.use((req, res, next) => {
     next();
