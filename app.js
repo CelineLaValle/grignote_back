@@ -21,11 +21,12 @@ const app = express();
 // Configurez CORS pour autoriser les requêtes avec des informations d'identification
 const corsOptions = {
   origin: function(origin, callback) {
-    const allowedOrigins = [process.env.FRONTEND_URL, 'http://localhost:3000'];
-    // origin est undefined dans le cas des requêtes du même serveur
-    if (!origin || allowedOrigins.includes(origin)) {
+    // Autoriser toutes les origines en développement local
+    // En production, utiliser les origines spécifiques
+    if (!origin || origin === 'http://localhost:3000' || origin === process.env.FRONTEND_URL || origin.includes('vercel.app')) {
       callback(null, true);
     } else {
+      console.log('CORS bloqué pour:', origin);
       callback(new Error('Not allowed by CORS'));
     }
   },
@@ -58,8 +59,15 @@ app.use('/category', category);
 app.use('/favori', favori);
 app.use('/verify', verify);
 
-app.use((req, res, next) => {
-    next();
+// Middleware de gestion d'erreurs
+app.use((err, req, res, next) => {
+  console.error('Erreur:', err);
+  res.status(500).json({ error: 'Erreur serveur' });
+});
+
+// Route par défaut pour éviter les erreurs HTML
+app.use((req, res) => {
+  res.status(404).json({ error: 'Route non trouvée' });
 });
 
 // Lancement du serveur
