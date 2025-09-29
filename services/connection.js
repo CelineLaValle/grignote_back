@@ -14,13 +14,16 @@ const pool = mysql.createPool({
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
-    port: process.env.DB_PORT,
+    port: process.env.DB_PORT || 3306,
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0,
     ssl: process.env.NODE_ENV === 'production' ? {
         rejectUnauthorized: false
-    } : false
+    } : false,
+    // Forcer l'utilisation d'IPv4
+    connectTimeout: 10000, // Augmenter le timeout
+    family: 4 // Forcer IPv4
 });
 
 // Tester la connexion au démarrage
@@ -32,6 +35,11 @@ pool.getConnection()
     .catch(err => {
         console.error('❌ Erreur de connexion à la base de données:', err);
     });
+
+// Ajouter un gestionnaire d'erreurs pour le pool
+pool.on('error', (err) => {
+    console.error('Erreur inattendue du pool de connexion:', err);
+});
 
 module.exports = pool;
 
