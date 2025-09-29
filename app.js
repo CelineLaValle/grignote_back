@@ -61,9 +61,6 @@ app.use(cors({
   
 //   next();
 // });
-app.get('/ping', (req, res) => {
-  res.json({ message: 'pong' });
-});
 
 
 // Middleware pour parser les données JSON
