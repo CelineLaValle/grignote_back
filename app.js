@@ -30,23 +30,11 @@ app.use((req, res, next) => {
   next();
 });
 
-// Configurez CORS pour autoriser les requêtes avec des informations d'identification
-const corsOptions = {
-  origin: function(origin, callback) {
-    // Autoriser toutes les origines en développement local
-    // En production, utiliser les origines spécifiques
-    if (!origin || origin === 'http://localhost:3000' || origin === process.env.FRONTEND_URL || origin.includes('vercel.app')) {
-      console.log('CORS autorisé pour:', origin);
-      callback(null, true);
-    } else {
-      console.log('CORS bloqué pour:', origin);
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true,
-};
-
-app.use(cors(corsOptions));
+// Configuration CORS simplifiée pour résoudre les problèmes
+app.use(cors({
+  origin: ['http://localhost:3000', 'https://grignote-front-34i6.vercel.app'],
+  credentials: true
+}));
 
 // Middleware pour parser les données JSON
 app.use(express.json());
