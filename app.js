@@ -17,6 +17,12 @@ const authMe = require('./routes/auth/me.js');
 const connection = require('./services/connection.js');
 const app = express();
 
+// 🚀 Route de test santé
+app.get('/ping', (req, res) => {
+  res.json({ message: 'pong 🏓' });
+});
+
+
 // Middleware de débogage - AJOUTER AU DÉBUT
 app.use((req, res, next) => {
   console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
