@@ -17,6 +17,15 @@ const authMe = require('./routes/auth/me.js');
 const connection = require('./services/connection.js');
 const app = express();
 
+process.on('unhandledRejection', (reason) => {
+  console.error('🔥 Unhandled Promise Rejection:', reason);
+});
+
+process.on('uncaughtException', (err) => {
+  console.error('🔥 Uncaught Exception:', err);
+});
+
+
 // 🚀 Route de test santé
 app.get('/ping', (req, res) => {
   res.json({ message: 'pong 🏓' });
