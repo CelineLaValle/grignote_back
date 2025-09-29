@@ -116,11 +116,14 @@ app.use((req, res) => {
 
 // Lancement du serveur
 const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => {
-    console.log(`Serveur démarré sur le port ${PORT}`);
+// Si PORT est 3306 (port MySQL), utiliser 8080 à la place
+const APP_PORT = PORT === 3306 ? 8080 : PORT;
+
+app.listen(APP_PORT, () => {
+    console.log(`Serveur démarré sur le port ${APP_PORT}`);
     console.log('Variables d\'environnement:');
     console.log('- FRONTEND_URL:', process.env.FRONTEND_URL);
-    console.log('- DB_HOST:', process.env.DB_HOST || 'non défini');
-    console.log('- RAILWAY_PRIVATE_DOMAIN:', process.env.RAILWAY_PRIVATE_DOMAIN || 'non défini');
-    console.log('- DB_PORT:', process.env.DB_PORT || '3306 (défaut)');
+    console.log('- MYSQL_URL présent:', process.env.MYSQL_URL ? 'Oui' : 'Non');
+    console.log('- MYSQLHOST présent:', process.env.MYSQLHOST ? 'Oui' : 'Non');
+    console.log('- DB_HOST présent:', process.env.DB_HOST ? 'Oui' : 'Non');
 });
