@@ -117,9 +117,9 @@ app.use((req, res) => {
 });
 
 // Lancement du serveur
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 8080;
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`Serveur démarré sur le port ${PORT}`);
   console.log('Mode:', process.env.NODE_ENV || 'développement');
   console.log('Variables d\'environnement:');
