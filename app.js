@@ -93,10 +93,10 @@ app.use((req, res) => {
 });
 
 // Lancement du serveur
-const DB_PORT = process.env.DB_PORT || 4000;
+const PORT = process.env.PORT || 4000;
 
-app.listen(DB_PORT, () => {
-  console.log(`Serveur démarré sur le port ${DB_PORT}`);
+app.listen(PORT, () => {
+  console.log(`Serveur démarré sur le port ${PORT}`);
   console.log('Mode:', process.env.NODE_ENV || 'développement');
   console.log('Variables d\'environnement:');
   console.log('- FRONTEND_URL:', process.env.FRONTEND_URL || 'http://localhost:3000');
