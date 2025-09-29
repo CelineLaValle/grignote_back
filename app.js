@@ -30,20 +30,37 @@ app.use((req, res, next) => {
   next();
 });
 
-// Ajout des headers CORS manuellement pour résoudre les problèmes persistants
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', req.headers.origin || 'http://localhost:3000');
-  res.header('Access-Control-Allow-Credentials', 'true');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://grignote-front-34i6.vercel.app/',  
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true, // important si tu utilises des cookies / sessions
+}));
+
+
+// // Ajout des headers CORS manuellement pour résoudre les problèmes persistants
+// app.use((req, res, next) => {
+//   res.header('Access-Control-Allow-Origin', req.headers.origin || 'http://localhost:3000');
+//   res.header('Access-Control-Allow-Credentials', 'true');
+//   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+//   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   
-  // Répondre immédiatement aux requêtes OPTIONS
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
+//   // Répondre immédiatement aux requêtes OPTIONS
+//   if (req.method === 'OPTIONS') {
+//     return res.status(200).end();
+//   }
   
-  next();
-});
+//   next();
+// });
 
 // Middleware pour parser les données JSON
 app.use(express.json());
@@ -51,17 +68,17 @@ app.use(express.json());
 // Middleware pour parser les cookies
 app.use(cookieParser());
 
-// Vérification de la connexion à la base de données avec gestion d'erreur améliorée
-app.use(async (req, res, next) => {
-  try {
-    // Tester la connexion à la base de données
-    const [rows] = await connection.query('SELECT 1');
-    next();
-  } catch (error) {
-    console.error('Erreur de connexion à la base de données:', error);
-    res.status(500).json({ error: 'Erreur de connexion à la base de données' });
-  }
-});
+// // Vérification de la connexion à la base de données avec gestion d'erreur améliorée
+// app.use(async (req, res, next) => {
+//   try {
+//     // Tester la connexion à la base de données
+//     const [rows] = await connection.query('SELECT 1');
+//     next();
+//   } catch (error) {
+//     console.error('Erreur de connexion à la base de données:', error);
+//     res.status(500).json({ error: 'Erreur de connexion à la base de données' });
+//   }
+// });
 
 // Servir les fichiers statiques du dossier 'uploads'
 app.use('/uploads', express.static('uploads'));

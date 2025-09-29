@@ -39,7 +39,7 @@ function createConnectionPool() {
   if (process.env.MYSQL_URL) {
     console.log('Utilisation de MYSQL_URL pour la connexion');
     return mysql.createPool({
-      uri: process.env.MYSQL_URL,
+      ...mysql.parseUrl(process.env.MYSQL_URL),
       waitForConnections: true,
       connectionLimit: 10,
       queueLimit: 0,
@@ -49,7 +49,7 @@ function createConnectionPool() {
   }
   
   // Priorité 2: Utiliser les variables MYSQL_* si disponibles
-  if (process.env.MYSQLHOST) {
+  if (process.env.MYSQLHOST === 'production') {
     console.log('Utilisation des variables MYSQL_* pour la connexion');
     return mysql.createPool({
       host: process.env.MYSQLHOST,
@@ -97,7 +97,7 @@ function tryConnection() {
       connection.release();
     })
     .catch(err => {
-      console.error(`❌ Erreur de connexion à la base de données (tentative ${attempts}/${maxAttempts}):`, err);
+      console.error(`Erreur de connexion à la base de données (tentative ${attempts}/${maxAttempts}):`, err);
       
       if (attempts < maxAttempts) {
         console.log(`Nouvelle tentative dans 5 secondes...`);
