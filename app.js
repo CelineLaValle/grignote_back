@@ -127,10 +127,10 @@ app.use((req, res) => {
 
 // Lancement du serveur
 const PORT = process.env.PORT;
-
+if (!PORT) {
+  console.error('❌ PORT non défini');
+  process.exit(1);
+}
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Serveur démarré sur le port ${PORT}`);
-  console.log('Mode:', process.env.NODE_ENV || 'développement');
-  console.log('Variables d\'environnement:');
-  console.log('- FRONTEND_URL:', process.env.FRONTEND_URL || 'http://localhost:3000');
+  console.log(`🚀 Serveur démarré sur le port ${PORT}`);
 });
