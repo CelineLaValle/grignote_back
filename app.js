@@ -15,20 +15,18 @@ const login = require('./routes/auth/login.js');
 const logout = require('./routes/auth/logout.js');
 const authMe = require('./routes/auth/me.js');
 const connection = require('./services/connection.js');
-
 const app = express();
 
 // Middleware de débogage - AJOUTER AU DÉBUT
 app.use((req, res, next) => {
   console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
-  
+
   // Intercepter la réponse pour la logger
   const originalSend = res.send;
   res.send = function(body) {
     console.log(`[${new Date().toISOString()}] Réponse: ${body.substring(0, 200)}${body.length > 200 ? '...' : ''}`);
     return originalSend.call(this, body);
   };
-  
   next();
 });
 
@@ -56,12 +54,11 @@ app.use(express.json());
 // Middleware pour parser les cookies
 app.use(cookieParser());
 
-// Vérification de la connexion à la base de données
+// Vérification de la connexion à la base de données avec gestion d'erreur améliorée
 app.use(async (req, res, next) => {
   try {
     // Tester la connexion à la base de données
     const [rows] = await connection.query('SELECT 1');
-    console.log('Connexion à la base de données OK');
     next();
   } catch (error) {
     console.error('Erreur de connexion à la base de données:', error);
@@ -104,10 +101,8 @@ const PORT = process.env.PORT || 4000;
 const APP_PORT = parseInt(PORT) === 3306 ? 8080 : PORT;
 
 app.listen(APP_PORT, () => {
-    console.log(`Serveur démarré sur le port ${APP_PORT}`);
-    console.log('Variables d\'environnement:');
-    console.log('- FRONTEND_URL:', process.env.FRONTEND_URL);
-    console.log('- MYSQL_URL présent:', process.env.MYSQL_URL ? 'Oui' : 'Non');
-    console.log('- MYSQLHOST présent:', process.env.MYSQLHOST ? 'Oui' : 'Non');
-    console.log('- DB_HOST présent:', process.env.DB_HOST ? 'Oui' : 'Non');
+  console.log(`Serveur démarré sur le port ${APP_PORT}`);
+  console.log('Mode:', process.env.NODE_ENV || 'développement');
+  console.log('Variables d\'environnement:');
+  console.log('- FRONTEND_URL:', process.env.FRONTEND_URL || 'http://localhost:3000');
 });

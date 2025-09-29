@@ -1,57 +1,51 @@
 const mysql = require('mysql2/promise');
 require('dotenv').config();
 
-// Afficher les informations de connexion
+// Afficher les informations de connexion (sans les mots de passe)
 console.log('Tentative de connexion à la base de données:');
-console.log('- MYSQL_URL présent:', process.env.MYSQL_URL ? 'Oui' : 'Non');
-console.log('- MYSQLHOST présent:', process.env.MYSQLHOST ? 'Oui' : 'Non');
 
-// Fonction pour créer le pool de connexion
-function createConnectionPool() {
-  // Si MYSQL_URL est disponible (format Railway)
-  if (process.env.MYSQL_URL) {
-    console.log('Utilisation de MYSQL_URL pour la connexion');
-    return mysql.createPool(process.env.MYSQL_URL);
+// Fonction pour déterminer les paramètres de connexion
+function getConnectionConfig() {
+  // En environnement local
+  if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
+    console.log('Mode: développement local');
+    return {
+      host: process.env.DB_HOST || 'localhost',
+      user: process.env.DB_USER || 'root',
+      password: process.env.DB_PASSWORD || '',
+      database: process.env.DB_NAME || 'grignote',
+      port: process.env.DB_PORT || 3306,
+      ssl: false
+    };
   }
   
-  // Utiliser les variables Railway si disponibles
-  if (process.env.MYSQLHOST) {
-    console.log('Utilisation des variables Railway pour la connexion');
-    return mysql.createPool({
-      host: process.env.MYSQLHOST,
-      user: process.env.MYSQLUSER,
-      password: process.env.MYSQLPASSWORD,
-      database: process.env.MYSQLDATABASE,
-      port: process.env.MYSQLPORT || 3306,
-      waitForConnections: true,
-      connectionLimit: 10,
-      queueLimit: 0,
-      ssl: process.env.NODE_ENV === 'production' ? {
-        rejectUnauthorized: false
-      } : false,
-      connectTimeout: 20000
-    });
-  }
-  
-  // Fallback sur les variables DB_*
-  console.log('Utilisation des variables DB_* pour la connexion');
-  return mysql.createPool({
-    host: process.env.DB_HOST,
+  // En production (Railway)
+  console.log('Mode: production (Railway)');
+  return {
+    host: process.env.RAILWAY_PRIVATE_DOMAIN || process.env.DB_HOST,
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
     port: process.env.DB_PORT || 3306,
-    waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0,
-    ssl: process.env.NODE_ENV === 'production' ? {
+    ssl: {
       rejectUnauthorized: false
-    } : false,
-    connectTimeout: 20000
-  });
+    }
+  };
 }
 
-const pool = createConnectionPool();
+const config = getConnectionConfig();
+console.log('- Host:', config.host || 'non défini');
+console.log('- Database:', config.database || 'non défini');
+console.log('- Port:', config.port || 'non défini');
+console.log('- SSL:', config.ssl ? 'activé' : 'désactivé');
+
+const pool = mysql.createPool({
+  ...config,
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0,
+  connectTimeout: 20000
+});
 
 // Tester la connexion au démarrage
 pool.getConnection()
@@ -64,4 +58,3 @@ pool.getConnection()
   });
 
 module.exports = pool;
-
