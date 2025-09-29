@@ -25,9 +25,9 @@ const sendVerificationMail = async (email, token) => {
       `,
     });
 
-    console.log('✅ Mail envoyé avec succès :', info.messageId);
+    console.log('Mail envoyé avec succès :', info.messageId);
   } catch (error) {
-    console.error('❌ Erreur détaillée lors de l\'envoi du mail :');
+    console.error('Erreur détaillée lors de l\'envoi du mail :');
   }
 };
 

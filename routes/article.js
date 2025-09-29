@@ -245,7 +245,7 @@ router.delete('/:id', authMiddleware, async (req, res) => {
         const userArticle = userRows[0];
 
         if (!userArticle) {
-            return res.status(404).json({ message: 'Auteur de l’article non trouvé' });
+            return res.status(404).json({ message: 'Auteur de l\'article non trouvé' });
         }
 
         // Vérifier si auteur ou admin

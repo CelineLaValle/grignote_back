@@ -20,8 +20,16 @@ const app = express();
 
 // Configurez CORS pour autoriser les requêtes avec des informations d'identification
 const corsOptions = {
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000', // Utilise l'URL du frontend depuis les variables d'environnement
-  credentials: true, // Autorisez les requêtes avec des informations d'identification
+  origin: function(origin, callback) {
+    const allowedOrigins = [process.env.FRONTEND_URL, 'http://localhost:3000'];
+    // origin est undefined dans le cas des requêtes du même serveur
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
 };
 
 app.use(cors(corsOptions));
