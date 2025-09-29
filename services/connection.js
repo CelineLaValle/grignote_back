@@ -1,6 +1,13 @@
 const mysql = require('mysql2/promise');
 require('dotenv').config();
 
+// Afficher les informations de connexion (sans les mots de passe)
+console.log('Tentative de connexion à la base de données:');
+console.log('- Host:', process.env.RAILWAY_PRIVATE_DOMAIN || process.env.DB_HOST || 'non défini');
+console.log('- Database:', process.env.DB_NAME || 'non défini');
+console.log('- Port:', process.env.DB_PORT || 'non défini');
+console.log('- SSL:', process.env.NODE_ENV === 'production' ? 'activé' : 'désactivé');
+
 const pool = mysql.createPool({
     // Utiliser la chaîne de connexion Railway si disponible, sinon utiliser les variables individuelles
     host: process.env.RAILWAY_PRIVATE_DOMAIN || process.env.DB_HOST,
@@ -15,6 +22,16 @@ const pool = mysql.createPool({
         rejectUnauthorized: false
     } : false
 });
+
+// Tester la connexion au démarrage
+pool.getConnection()
+    .then(connection => {
+        console.log('✅ Connexion à la base de données établie avec succès');
+        connection.release();
+    })
+    .catch(err => {
+        console.error('❌ Erreur de connexion à la base de données:', err);
+    });
 
 module.exports = pool;
 

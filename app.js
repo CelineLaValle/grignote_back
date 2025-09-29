@@ -18,12 +18,27 @@ const connection = require('./services/connection.js');
 
 const app = express();
 
+// Middleware de débogage - AJOUTER AU DÉBUT
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  
+  // Intercepter la réponse pour la logger
+  const originalSend = res.send;
+  res.send = function(body) {
+    console.log(`[${new Date().toISOString()}] Réponse: ${body.substring(0, 200)}${body.length > 200 ? '...' : ''}`);
+    return originalSend.call(this, body);
+  };
+  
+  next();
+});
+
 // Configurez CORS pour autoriser les requêtes avec des informations d'identification
 const corsOptions = {
   origin: function(origin, callback) {
     // Autoriser toutes les origines en développement local
     // En production, utiliser les origines spécifiques
     if (!origin || origin === 'http://localhost:3000' || origin === process.env.FRONTEND_URL || origin.includes('vercel.app')) {
+      console.log('CORS autorisé pour:', origin);
       callback(null, true);
     } else {
       console.log('CORS bloqué pour:', origin);
@@ -40,6 +55,19 @@ app.use(express.json());
 
 // Middleware pour parser les cookies
 app.use(cookieParser());
+
+// Vérification de la connexion à la base de données
+app.use(async (req, res, next) => {
+  try {
+    // Tester la connexion à la base de données
+    const [rows] = await connection.query('SELECT 1');
+    console.log('Connexion à la base de données OK');
+    next();
+  } catch (error) {
+    console.error('Erreur de connexion à la base de données:', error);
+    res.status(500).json({ error: 'Erreur de connexion à la base de données' });
+  }
+});
 
 // Servir les fichiers statiques du dossier 'uploads'
 app.use('/uploads', express.static('uploads'));
@@ -62,7 +90,7 @@ app.use('/verify', verify);
 // Middleware de gestion d'erreurs
 app.use((err, req, res, next) => {
   console.error('Erreur:', err);
-  res.status(500).json({ error: 'Erreur serveur' });
+  res.status(500).json({ error: 'Erreur serveur', message: err.message });
 });
 
 // Route par défaut pour éviter les erreurs HTML
@@ -71,6 +99,11 @@ app.use((req, res) => {
 });
 
 // Lancement du serveur
-app.listen(4000, () => {
-    console.log('Serveur démarré sur le port 4000');
+const PORT = process.env.PORT || 4000;
+app.listen(PORT, () => {
+    console.log(`Serveur démarré sur le port ${PORT}`);
+    console.log('Variables d\'environnement:');
+    console.log('- FRONTEND_URL:', process.env.FRONTEND_URL);
+    console.log('- DB_HOST:', process.env.DB_HOST || 'non défini');
+    console.log('- RAILWAY_PRIVATE_DOMAIN:', process.env.RAILWAY_PRIVATE_DOMAIN || 'non défini');
 });
