@@ -30,11 +30,20 @@ app.use((req, res, next) => {
   next();
 });
 
-// Configuration CORS simplifiée pour résoudre les problèmes
-app.use(cors({
-  origin: ['http://localhost:3000', 'https://grignote-front-34i6.vercel.app'],
-  credentials: true
-}));
+// Ajout des headers CORS manuellement pour résoudre les problèmes persistants
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', req.headers.origin || 'http://localhost:3000');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  
+  // Répondre immédiatement aux requêtes OPTIONS
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+  
+  next();
+});
 
 // Middleware pour parser les données JSON
 app.use(express.json());
@@ -84,12 +93,10 @@ app.use((req, res) => {
 });
 
 // Lancement du serveur
-const PORT = process.env.PORT || 4000;
-// Si PORT est 3306 (port MySQL), utiliser 8080 à la place
-const APP_PORT = parseInt(PORT) === 3306 ? 8080 : PORT;
+const DB_PORT = process.env.DB_PORT || 4000;
 
-app.listen(APP_PORT, () => {
-  console.log(`Serveur démarré sur le port ${APP_PORT}`);
+app.listen(DB_PORT, () => {
+  console.log(`Serveur démarré sur le port ${DB_PORT}`);
   console.log('Mode:', process.env.NODE_ENV || 'développement');
   console.log('Variables d\'environnement:');
   console.log('- FRONTEND_URL:', process.env.FRONTEND_URL || 'http://localhost:3000');
