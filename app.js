@@ -101,7 +101,7 @@ app.use((req, res) => {
 // Lancement du serveur
 const PORT = process.env.PORT || 4000;
 // Si PORT est 3306 (port MySQL), utiliser 8080 à la place
-const APP_PORT = PORT === 3306 ? 8080 : PORT;
+const APP_PORT = parseInt(PORT) === 3306 ? 8080 : PORT;
 
 app.listen(APP_PORT, () => {
     console.log(`Serveur démarré sur le port ${APP_PORT}`);
