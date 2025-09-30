@@ -47,7 +47,7 @@ app.use((req, res, next) => {
 
 const allowedOrigins = [
   'http://localhost:3000',
-  'https://grignote-front-34i6.vercel.app/',  
+  'https://grignote-front-34i6.vercel.app',  
 ];
 
 app.use(cors({
