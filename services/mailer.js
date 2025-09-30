@@ -1,13 +1,13 @@
 const nodemailer = require('nodemailer');
 
-// Configuration du transporteur Gmail
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  host: 'smtp.gmail.com',
+  port: 465,
+  secure: true, // SSL
   auth: {
-      user: process.env.GMAIL_USER,
-      pass: process.env.GMAIL_PASS,
+    user: process.env.GMAIL_USER,
+    pass: process.env.GMAIL_PASS,
   },
-    secure: true,
 });
 
 // Fonction pour envoyer le mail de confirmation
