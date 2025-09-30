@@ -50,16 +50,21 @@ const allowedOrigins = [
   'https://grignote-front-34i6.vercel.app',  
 ];
 
+// Activer CORS pour toutes les origines
 app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, origin);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true, // important si tu utilises des cookies / sessions
+  origin: true,       // permet toutes les origines
+  credentials: true,  // important si tu utilises des cookies / sessions
 }));
+
+// Route exemple
+app.get('/products/:id', function (req, res) {
+  res.json({ msg: 'This is CORS-enabled for all origins!' });
+});
+
+// Lancement du serveur
+app.listen(80, function () {
+  console.log('CORS-enabled web server listening on port 80');
+});
 
 
 // // Ajout des headers CORS manuellement pour résoudre les problèmes persistants
