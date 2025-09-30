@@ -60,7 +60,7 @@ router.post('/', async (req, res) => {
         res.cookie('token', token, {
             httpOnly: true, // Protège contre les attaques XSS : JavaScript ne peut pas lire le cookie
             secure: process.env.NODE_ENV === 'production', // Envoie le cookie uniquement en HTTPS si on est en production
-            sameSite: 'strict', // Empêche l'envoi du cookie sur des requêtes cross-site -> protection CSRF
+            sameSite: 'none', // Empêche l'envoi du cookie sur des requêtes cross-site -> protection CSRF
             maxAge: 2 * 60 * 60 * 1000 // Durée de vie du cookie en millisecondes (2h ici)
         });
 
