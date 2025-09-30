@@ -52,13 +52,20 @@ const allowedOrigins = [
 
 // Activer CORS pour toutes les origines
 app.use(cors({
-  origin: true,       // permet toutes les origines
-  credentials: true,  // important si tu utilises des cookies / sessions
+  origin: function (origin, callback) {
+    // Autoriser si l'origine est dans la whitelist ou si pas d'origine (Postman, curl)
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true, // important pour cookies/sessions
 }));
 
 // Route exemple
-app.get('/products/:id', function (req, res) {
-  res.json({ msg: 'This is CORS-enabled for all origins!' });
+app.get('/test', (req, res) => {
+  res.json({ msg: 'CORS fonctionne et le serveur répond !' });
 });
 
 // Lancement du serveur
