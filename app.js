@@ -34,12 +34,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 // Servir les fichiers statiques du dossier 'uploads'
-app.use('/uploads', express.static('uploads', {
-  setHeaders: (res, path, stat) => {
-    res.set('Access-Control-Allow-Origin', 'https://grignote-front-34i6.vercel.app');
-    res.set('Access-Control-Allow-Credentials', 'true');
-  }
-}));
+app.use('/uploads', express.static('uploads'));
 
 // Routes d'authentification (à séparer pour éviter les conflits)
 app.use('/auth/register', register);
