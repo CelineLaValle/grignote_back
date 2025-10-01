@@ -7,7 +7,7 @@ router.post('/', (req, res) => {
     res.clearCookie('token', {
         httpOnly: true, // Doit être cohérent avec celui défini au login
         secure: true, // Toujours 'true' si vous êtes en HTTPS
-        sameSite: 'lax' // Même chose, doit être cohérent avec le cookie original
+        sameSite: 'none' // Même chose, doit être cohérent avec le cookie original
     });
 
     // On retourne une réponse de succès
