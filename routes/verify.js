@@ -30,7 +30,7 @@ router.get('/', async (req, res) => {
             [userId]
         );
 
-        res.json({ message: 'Email vérifié avec succès 🎉' });
+        res.json({ message: 'Email vérifié avec succès' });
     } catch (err) {
         res.status(500).json({ error: 'Erreur serveur' });
     }
