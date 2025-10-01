@@ -169,10 +169,11 @@ async function processArticleCreation(req, res) {
 
     const { title, ingredient, content, category, idUser } = req.body;
 
-    // L'image téléversée est dans req.file (si elle existe)
-    const image = req.file ? req.file.filename : null;
     // Validation : on vérifie que les champs sont rempli
     if (!title || !ingredient || !content || !category || !idUser) return res.status(400).json({ message: 'Champs requis' });
+
+    // L'image téléversée est dans req.file (si elle existe)
+    const image = req.file ? req.file.filename : null;
 
     try {
         // Requête pour insérer un nouvel article dans la base
