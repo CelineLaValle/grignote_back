@@ -34,22 +34,8 @@ const storage = multer.diskStorage({
     }
 });
 
-// Initialisation de multer avec ce stockage + filtrer les fichiers images + taille max
-const upload = multer({
-    storage,
-    limits: { fileSize: 1 * 1024 * 1024 }, // 1 Mo
-    fileFilter: (req, file, cb) => {
-        const fileTypes = /jpeg|jpg|png|gif|webp/;
-        const extname = fileTypes.test(path.extname(file.originalname).toLowerCase());
-        const mimetype = fileTypes.test(file.mimetype);
-
-        if (mimetype && extname) {
-            cb(null, true);
-        } else {
-            cb(new Error('Format de fichier non supporté. Seules les images sont autorisées.'));
-        }
-    }
-});
+// Initialisation de multer avec ce stockage
+const upload = multer({ storage });
 
 
 router.get('/user/:idUser', async (req, res) => {
@@ -146,36 +132,22 @@ router.get('/', async (req, res) => {
 
 
 // Créer un nouvel article
-router.post('/', (req, res) => {
-    // Middleware multer avec gestion d'erreur
-    upload.single('image')(req, res, function(err) {
-        if (err) {
-            console.error('Erreur upload:', err);
-            if (err.code === 'LIMIT_FILE_SIZE') {
-                return res.status(413).json({ error: 'Le fichier est trop volumineux (max 1 Mo)' });
-            }
-            return res.status(400).json({ error: err.message });
-        }
-        
-        // Continuer le traitement si pas d'erreur
-        processArticleCreation(req, res);
-    });
-});
 
-// Fonction pour traiter la création d'article après validation de l'image
-async function processArticleCreation(req, res) {
+router.post('/', upload.single('image'), async (req, res) => {
     console.log('BODY:', req.body);
     console.log('FILE:', req.file);
 
     const { title, ingredient, content, category, idUser } = req.body;
+    console.log('BODY:', req.body);
 
-    // Validation : on vérifie que les champs sont rempli
-    if (!title || !ingredient || !content || !category || !idUser) return res.status(400).json({ message: 'Champs requis' });
 
     // L'image téléversée est dans req.file (si elle existe)
     const image = req.file ? req.file.filename : null;
+    // Validation : on vérifie que les champs sont rempli
+    if (!title || !ingredient || !content || !category || !idUser) return res.status(400).json({ message: 'Champs requis' });
 
     try {
+
         // Requête pour insérer un nouvel article dans la base
         const [result] = await pool.query('INSERT INTO article (title, ingredient, content, category, image, idUser) VALUES (?, ?, ?, ?, ?, ?)', [title, ingredient, content, category, image || null, idUser]);
 
@@ -196,32 +168,14 @@ async function processArticleCreation(req, res) {
         res.status(201).json(newArticle); // 201 = Created
     } catch (err) {
         console.error('Erreur SQL:', err);
+        // res.status(500).json({ error: 'Erreur serveur' });
         res.status(500).json({ error: err.message });
     }
-}
-
-// Modifier un article existant
-router.put('/:id', authMiddleware, (req, res) => {
-    // Middleware multer avec gestion d'erreur
-    upload.single('image')(req, res, function(err) {
-        if (err) {
-            console.error('Erreur upload:', err);
-            if (err.code === 'LIMIT_FILE_SIZE') {
-                return res.status(413).json({ error: 'Le fichier est trop volumineux (max 1 Mo)' });
-            }
-            return res.status(400).json({ error: err.message });
-        }
-        
-        // Continuer le traitement si pas d'erreur
-        const { title, ingredient, content, category } = req.body;
-        const image = req.file ? req.file.filename : null;
-
-        processArticleUpdate(req, res);
-    });
 });
 
-// Fonction pour traiter la mise à jour d'article après validation de l'image
-async function processArticleUpdate(req, res) {
+// Modifier un article existant
+
+router.put('/:id', authMiddleware, upload.single('image'), async (req, res) => {
     const { title, ingredient, content, category } = req.body;
     const image = req.file ? req.file.filename : null;
 
@@ -229,6 +183,8 @@ async function processArticleUpdate(req, res) {
     if (!title || !ingredient || !content || !category) return res.status(400).json({ message: 'Champs requis' });
 
     try {
+
+
         // Récupérer l'article existant
         const [rows] = await pool.query('SELECT * FROM article WHERE idArticle = ?', [req.params.id]);
         const article = rows[0];
@@ -269,7 +225,7 @@ async function processArticleUpdate(req, res) {
         console.error(err);
         res.status(500).json({ error: 'Erreur serveur' });
     }
-}
+});
 
 // Supprimer un article par ID
 
