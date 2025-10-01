@@ -6,7 +6,7 @@ const pool = require('../../services/connection');
 
 router.post('/', async (req, res) => {
     const { email, password } = req.body;
-    console.log("Bonjour");
+
     // Validation des champs
     if (!email || !password) {
         return res.status(400).json({ message: 'Email et mot de passe requis' });
@@ -14,7 +14,7 @@ router.post('/', async (req, res) => {
 
     try {
         // const pool = await connection();
-        console.log(req.body)
+
         // Cherche l'utilisateur par email
         const [users] = await pool.query('SELECT * FROM user WHERE email = ?', [email]);
         if (users.length === 0) {
@@ -60,7 +60,7 @@ router.post('/', async (req, res) => {
         res.cookie('token', token, {
             httpOnly: true, // Protège contre les attaques XSS : JavaScript ne peut pas lire le cookie
             secure: process.env.NODE_ENV === 'production', // Envoie le cookie uniquement en HTTPS si on est en production
-            sameSite: 'lax', // Empêche l'envoi du cookie sur des requêtes cross-site -> protection CSRF
+            sameSite: 'none', // Empêche l'envoi du cookie sur des requêtes cross-site -> protection CSRF
             maxAge: 2 * 60 * 60 * 1000 // Durée de vie du cookie en millisecondes (2h ici)
         });
 

@@ -18,7 +18,7 @@ router.post('/', async (req, res) => {
 
     try {
         // const pool = app.locals.db;
-console.log(req.body);
+
         // Vérifie si l'utilisateur existe déjà
         const [existingUsers] = await pool.query('SELECT * FROM user WHERE email = ?', [email]);
         if (existingUsers.length > 0) {
