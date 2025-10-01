@@ -67,6 +67,7 @@ router.get('/:id', async (req, res) => {
 
         // Récupérer les tags associés à cet article
         const [tags] = await pool.query(
+            //t = alias pour tag, ta = tag_article
             'SELECT t.idTag, t.name FROM tag t JOIN tag_article ta ON t.idTag = ta.idTag WHERE ta.idArticle = ?',
             [req.params.id]
         );

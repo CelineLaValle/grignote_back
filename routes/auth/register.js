@@ -32,7 +32,7 @@ router.post('/', async (req, res) => {
         const role = 'utilisateur';
 
         // Enregistre l'utilisateur dans la base de données
-        const [result] = await pool.query('INSERT INTO user (pseudo, email, password, role) VALUES (?, ?, ?, ?)', [pseudo, email, hashedPassword, role]);
+        const [result] = await pool.query('INSERT INTO user (pseudo, email, password, role, is_verified) VALUES (?, ?, ?, ?, ?)', [pseudo, email, hashedPassword, role, 1]);
 
         // Génère un token pour l'email
         const verifyToken = uuidv4();
