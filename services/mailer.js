@@ -8,6 +8,7 @@ const transporter = nodemailer.createTransport({
     user: process.env.GMAIL_USER,
     pass: process.env.GMAIL_PASS,
   },
+  connectionTimeout: 10000,
 });
 
 // Fonction pour envoyer le mail de confirmation
@@ -17,7 +18,7 @@ const sendVerificationMail = async (email, token) => {
 
   try {
     let info = await transporter.sendMail({
-      from: `'Blog de Recettes 🍲' <${process.env.GMAIL_USER}>`, 
+      from: `'Blog de Recettes 🍲' <${process.env.GMAIL_USER}>`,
       to: email,
       subject: 'Confirme ton email',
       html: `
