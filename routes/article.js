@@ -150,6 +150,7 @@ router.post('/', (req, res) => {
     // Middleware multer avec gestion d'erreur
     upload.single('image')(req, res, function(err) {
         if (err) {
+            console.error('Erreur upload:', err);
             if (err.code === 'LIMIT_FILE_SIZE') {
                 return res.status(400).json({ error: 'Le fichier est trop volumineux (max 1 Mo)' });
             }
