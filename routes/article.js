@@ -5,6 +5,7 @@ const multer = require('multer');
 const path = require('path');
 const jwt = require('jsonwebtoken');
 const pool = require('../services/connection');
+const { storage } = require('../config/cloudinary'); 
 
 // Middleware d'authentification
 function authMiddleware(req, res, next) {
@@ -252,6 +253,12 @@ router.delete('/:id', authMiddleware, async (req, res) => {
         // Vérifier si auteur ou admin
         if (req.user.role !== 'admin' && article.idUser !== req.user.idUser) {
             return res.status(403).json({ message: 'Accès interdit' });
+        }
+
+        // Supprimer l'image de Cloudinary
+          if (article.image) {
+            const publicId = article.image.split('/').pop().split('.')[0];
+            await cloudinary.uploader.destroy(`grignotages/${publicId}`);
         }
 
         // Supprimer les associations tags
