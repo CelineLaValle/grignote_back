@@ -152,7 +152,7 @@ router.post('/', (req, res) => {
         if (err) {
             console.error('Erreur upload:', err);
             if (err.code === 'LIMIT_FILE_SIZE') {
-                return res.status(400).json({ error: 'Le fichier est trop volumineux (max 1 Mo)' });
+                return res.status(413).json({ error: 'Le fichier est trop volumineux (max 1 Mo)' });
             }
             return res.status(400).json({ error: err.message });
         }
