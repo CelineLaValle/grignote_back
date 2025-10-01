@@ -2,10 +2,11 @@ const express = require('express');
 const router = express.Router();
 // const app = express();
 const multer = require('multer');
-const path = require('path');
 const jwt = require('jsonwebtoken');
 const pool = require('../services/connection');
-const { storage } = require('../config/cloudinary'); 
+const { storage, cloudinary } = require('../config/cloudinary');
+// Initialisation de multer avec ce stockage
+const upload = multer({ storage });
 
 // Middleware d'authentification
 function authMiddleware(req, res, next) {
@@ -20,24 +21,6 @@ function authMiddleware(req, res, next) {
         return res.status(401).json({ message: 'Token invalide' });
     }
 }
-
-
-// Définition de l'endroit où seront stockées les images
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        // Ici, tous les fichiers seront enregistrés dans le dossier 'uploads'
-        cb(null, 'uploads/')
-    },
-    filename: function (req, file, cb) {
-        // On renomme le fichier pour éviter les conflits : DateActuelle-NomOriginal
-        const uniqueName = Date.now() + '-' + file.originalname;
-        cb(null, uniqueName);
-    }
-});
-
-// Initialisation de multer avec ce stockage
-const upload = multer({ storage });
-
 
 router.get('/user/:idUser', async (req, res) => {
     const idUser = req.params.idUser;
@@ -135,15 +118,12 @@ router.get('/', async (req, res) => {
 // Créer un nouvel article
 
 router.post('/', upload.single('image'), async (req, res) => {
-    console.log('BODY:', req.body);
-    console.log('FILE:', req.file);
 
     const { title, ingredient, content, category, idUser } = req.body;
-    console.log('BODY:', req.body);
 
 
-    // L'image téléversée est dans req.file (si elle existe)
-    const image = req.file ? req.file.filename : null;
+    // L'image téléversée est dans req.file.path (URL Cloudinary)
+    const image = req.file ? req.file.path : null;
     // Validation : on vérifie que les champs sont rempli
     if (!title || !ingredient || !content || !category || !idUser) return res.status(400).json({ message: 'Champs requis' });
 
@@ -178,7 +158,7 @@ router.post('/', upload.single('image'), async (req, res) => {
 
 router.put('/:id', authMiddleware, upload.single('image'), async (req, res) => {
     const { title, ingredient, content, category } = req.body;
-    const image = req.file ? req.file.filename : null;
+    const image = req.file ? req.file.path : null;
 
     // Validation
     if (!title || !ingredient || !content || !category) return res.status(400).json({ message: 'Champs requis' });
