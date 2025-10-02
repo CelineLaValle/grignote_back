@@ -14,7 +14,6 @@ const register = require('./routes/auth/register.js');
 const login = require('./routes/auth/login.js');
 const logout = require('./routes/auth/logout.js');
 const authMe = require('./routes/auth/me.js'); // Import de la route pour récupérer les infos utilisateur
-const connection = require('./services/connection.js');
 
 const app = express();
 
@@ -33,14 +32,11 @@ app.use(express.json());
 // Middleware pour parser les cookies
 app.use(cookieParser());
 
-// Servir les fichiers statiques du dossier 'uploads'
-app.use('/uploads', express.static('uploads'));
-
 // Routes d'authentification (à séparer pour éviter les conflits)
 app.use('/auth/register', register);
 app.use('/auth/login', login);
 app.use('/auth/logout', logout);
-app.use('/auth/me', authMe); // Ajout de la route pour récupérer les infos utilisateur
+app.use('/auth/me', authMe); 
 
 // Routes principales
 app.use('/article', article);
@@ -51,10 +47,6 @@ app.use('/category', category);
 app.use('/favori', favori);
 app.use('/verify', verify);
 
-
-app.use((req, res, next) => {
-    next();
-});
 
 // Lancement du serveur
 app.listen(4000, () => {
