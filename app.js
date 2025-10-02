@@ -17,10 +17,10 @@ const authMe = require('./routes/auth/me.js'); // Import de la route pour récup
 
 const app = express();
 
-// Configurez CORS pour autoriser les requêtes avec des informations d'identification
+// Configuration des options CORS
 const corsOptions = {
-  origin: ['http://localhost:3000', 'https://grignote-front-34i6.vercel.app'], // Remplacez par l'origine de votre application frontend
-  credentials: true, // Autorisez les requêtes avec des informations d'identification
+  origin: ['http://localhost:3000', 'https://grignote-front-34i6.vercel.app'],
+  credentials: true, // Autorise l'envoi de cookies
 };
 
 app.use(cors(corsOptions));

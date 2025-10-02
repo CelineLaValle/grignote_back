@@ -13,7 +13,6 @@ router.post('/', async (req, res) => {
     }
 
     try {
-        // const pool = await connection();
 
         // Cherche l'utilisateur par email
         const [users] = await pool.query('SELECT * FROM user WHERE email = ?', [email]);
@@ -61,7 +60,7 @@ router.post('/', async (req, res) => {
             httpOnly: true, // Protège contre les attaques XSS : JavaScript ne peut pas lire le cookie
             secure: process.env.NODE_ENV === 'production', // Envoie le cookie uniquement en HTTPS si on est en production
             sameSite: 'none', // Empêche l'envoi du cookie sur des requêtes cross-site -> protection CSRF
-            maxAge: 2 * 60 * 60 * 1000 // Durée de vie du cookie en millisecondes (2h ici)
+            maxAge: 2 * 60 * 60 * 1000 // Durée de vie du cookie
         });
 
         res.json({
