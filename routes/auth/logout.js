@@ -5,9 +5,9 @@ const router = express.Router();
 router.post('/', (req, res) => {
     // On efface le cookie nommé 'token' en le vidant
     res.clearCookie('token', {
-        httpOnly: true, // Doit être cohérent avec celui défini au login
-        secure: true, // Toujours 'true' si vous êtes en HTTPS
-        sameSite: 'none' // Même chose, doit être cohérent avec le cookie original
+        httpOnly: true,
+        secure: true,
+        sameSite: 'none'
     });
 
     // On retourne une réponse de succès

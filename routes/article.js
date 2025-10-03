@@ -5,8 +5,7 @@ const multer = require('multer');
 const jwt = require('jsonwebtoken');
 const pool = require('../services/connection');
 const { storage, cloudinary } = require('../config/cloudinary');
-// Initialisation de multer avec ce stockage
-const upload = multer({ storage });
+const upload = multer({ storage });  // Indique à Multer comment et où stocker les images (ici sur Cloudinary)
 
 // Middleware d'authentification
 function authMiddleware(req, res, next) {
@@ -69,21 +68,14 @@ router.get('/:id', async (req, res) => {
 // Récupérer tous les articles avec leurs tags
 router.get('/', async (req, res) => {
     try {
-        // 1. Récupérer tous les articles (les plus récents en premier)
+        //Récupérer tous les articles (les plus récents en premier)
         const [articles] = await pool.query('SELECT * FROM article ORDER BY date DESC, idArticle DESC');
 
-        // 2. Récupérer tous les tags avec leurs associations en une requête
+        //Récupérer tous les tags avec leurs associations en une requête
         const [tagAssociations] = await pool.query(`
-            SELECT 
-                ta.idArticle,
-                t.idTag,
-                t.name
-            FROM tag_article ta
-            JOIN tag t ON ta.idTag = t.idTag
-            ORDER BY ta.idArticle, t.name
-        `);
+            SELECT ta.idArticle, t.idTag, t.name FROM tag_article ta JOIN tag t ON ta.idTag = t.idTag ORDER BY ta.idArticle, t.name`);
 
-        // 3. Organiser les tags par article
+        //Organiser les tags par article
         const tagsByArticle = {};
         tagAssociations.forEach(association => {
             if (!tagsByArticle[association.idArticle]) {
@@ -101,12 +93,6 @@ router.get('/', async (req, res) => {
             tags: tagsByArticle[article.idArticle] || []
         }));
 
-        console.log('Articles avec tags:', articlesWithTags.map(a => ({
-            id: a.idArticle,
-            title: a.title,
-            tags: a.tags.map(t => t.name)
-        })));
-
         res.json(articlesWithTags);
     } catch (err) {
         console.error('Erreur récupération articles:', err);
@@ -119,8 +105,8 @@ router.get('/', async (req, res) => {
 
 router.post('/', upload.single('image'), async (req, res) => {
 
+    // On récupère les données du formulaire depuis req.body
     const { title, ingredient, content, category, idUser } = req.body;
-
 
     // L'image téléversée est dans req.file.path (URL Cloudinary)
     const image = req.file ? req.file.path : null;
@@ -132,11 +118,11 @@ router.post('/', upload.single('image'), async (req, res) => {
         // Requête pour insérer un nouvel article dans la base
         const [result] = await pool.query('INSERT INTO article (title, ingredient, content, category, image, idUser) VALUES (?, ?, ?, ?, ?, ?)', [title, ingredient, content, category, image || null, idUser]);
 
-        // On retourne l'article nouvellement crée avec don ID généré automatiquement
+        // On retourne l'article nouvellement crée avec son ID généré automatiquement
         const newArticle = { id: result.insertId, title, ingredient, content, category, image, idUser };
-        // Si des tags sont envoyés
+        // Si des tags sont envoyés avec la création de l'article
         if (req.body.tags) {
-            const tagIds = JSON.parse(req.body.tags); // tableau d'IDs de tags
+            const tagIds = JSON.parse(req.body.tags); // tableau d'IDs en JSON
             if (tagIds.length > 0) {
                 const values = tagIds.map(tagId => [tagId, result.insertId]);
                 await pool.query(

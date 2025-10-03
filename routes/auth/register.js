@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs'); // Pour hacher les mots de passe
-const sendVerificationMail = require('../../services/mailer'); // import du fichier mailer.js
-const { v4: uuidv4 } = require('uuid'); // pour générer le token
+const sendVerificationMail = require('../../services/mailer');
+const { v4: uuidv4 } = require('uuid'); // Bibliothèque pour générer un identifiant unique (token) (ici pour le token de vérification par mail)
 
 
 
