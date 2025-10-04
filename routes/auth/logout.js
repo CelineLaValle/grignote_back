@@ -7,7 +7,7 @@ router.post('/', (req, res) => {
     res.clearCookie('token', {
         httpOnly: true,
         secure: true,
-        sameSite: 'lax'
+        sameSite: 'none'
     });
 
     // On retourne une réponse de succès
