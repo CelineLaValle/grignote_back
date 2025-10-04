@@ -22,7 +22,7 @@ const upload = multer({ storage });  // Indique à Multer comment et où stocker
 // }
 
 router.get('/user/:idUser', async (req, res) => {
-    const idUser = req.user.idUser;
+    const idUser = req.params.idUser;
     try {
         const [rows] = await pool.query('SELECT * FROM article WHERE idUser = ?', [idUser]);
         res.json(rows);
