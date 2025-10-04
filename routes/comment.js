@@ -1,13 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const auth = require('../middleware/auth');
+const authMiddleware = require('../middleware/auth');
 const pool = require('../services/connection');
 
 
 
 // Ajouter un commentaire
 
-router.post('/', auth, async (req, res) => {
+router.post('/', authMiddleware, async (req, res) => {
     // On récupère les champs depuis le body de la requête
     const { idArticle, content } = req.body;
     const idUser = req.user.idUser;

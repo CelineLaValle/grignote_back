@@ -6,7 +6,7 @@ const authMiddleware = require('../middleware/auth');
 
 // Récupérer tout les utilisateurs
 
-router.get('/', authMiddleware, async (req, res) => {
+router.get('/', async (req, res) => {
 
     try {
         
@@ -19,7 +19,7 @@ router.get('/', authMiddleware, async (req, res) => {
 
 // Récupérer un utilisateur par son ID
 
-router.get('/:id', authMiddleware, async (req, res) => {
+router.get('/:id', async (req, res) => {
     try {
         
         const [rows] = await pool.query('SELECT * FROM user WHERE idUser = ?', [req.params.id]);
