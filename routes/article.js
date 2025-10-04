@@ -7,20 +7,8 @@ const pool = require('../services/connection');
 const { storage, cloudinary } = require('../config/cloudinary');
 const upload = multer({ storage });  // Indique à Multer comment et où stocker les images (ici sur Cloudinary)
 
-// // Middleware d'authentification
-// function authMiddleware(req, res, next) {
-//     const token = req.cookies.token;
-//     if (!token) return res.status(401).json({ message: 'Non authentifié' });
 
-//     try {
-//         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-//         req.user = decoded;
-//         next(); // Token valide, on continue
-//     } catch (err) {
-//         return res.status(401).json({ message: 'Token invalide' });
-//     }
-// }
-
+// Récupère tous les articles d'un utilisateur donné
 router.get('/user/:idUser', async (req, res) => {
     const idUser = req.params.idUser;
     try {
