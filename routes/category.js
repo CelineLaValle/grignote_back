@@ -12,7 +12,7 @@ router.get('/', async (req, res) => {
 
     if (rows.length === 0) return res.json([]);
 
-    // Le type est quelque chose comme 'enum('Entrée','Plat','Dessert')'
+    // Le type est :'enum('Entrée','Plat','Dessert')'
     const enumString = rows[0].Type;
     const categories = enumString
       .replace('enum(', '')

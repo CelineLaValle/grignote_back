@@ -2,27 +2,27 @@ const express = require('express');
 const router = express.Router();
 // const app = express();
 const multer = require('multer');
-const jwt = require('jsonwebtoken');
+const authMiddleware = require('../middleware/auth');
 const pool = require('../services/connection');
 const { storage, cloudinary } = require('../config/cloudinary');
 const upload = multer({ storage });  // Indique à Multer comment et où stocker les images (ici sur Cloudinary)
 
-// Middleware d'authentification
-function authMiddleware(req, res, next) {
-    const token = req.cookies.token;
-    if (!token) return res.status(401).json({ message: 'Non authentifié' });
+// // Middleware d'authentification
+// function authMiddleware(req, res, next) {
+//     const token = req.cookies.token;
+//     if (!token) return res.status(401).json({ message: 'Non authentifié' });
 
-    try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        req.user = decoded;
-        next(); // Token valide, on continue
-    } catch (err) {
-        return res.status(401).json({ message: 'Token invalide' });
-    }
-}
+//     try {
+//         const decoded = jwt.verify(token, process.env.JWT_SECRET);
+//         req.user = decoded;
+//         next(); // Token valide, on continue
+//     } catch (err) {
+//         return res.status(401).json({ message: 'Token invalide' });
+//     }
+// }
 
-router.get('/user/:idUser', async (req, res) => {
-    const idUser = req.params.idUser;
+router.get('/user/:idUser', authMiddleware, async (req, res) => {
+    const idUser = req.user.idUser;
     try {
         const [rows] = await pool.query('SELECT * FROM article WHERE idUser = ?', [idUser]);
         res.json(rows);
@@ -202,10 +202,11 @@ router.put('/:id', authMiddleware, upload.single('image'), async (req, res) => {
     }
 });
 
-// Supprimer un article par ID
+// Supprimer un article
 
 router.delete('/:id', authMiddleware, async (req, res) => {
     try {
+        // Récupère l'identifiant de l'article depuis l'URL
         const id = req.params.id;
 
         // Vérifier si l'article existe
@@ -235,13 +236,15 @@ router.delete('/:id', authMiddleware, async (req, res) => {
             await cloudinary.uploader.destroy(`grignotages/${publicId}`);
         }
 
-        // Supprimer les associations tags
+
+        // Supprimer toutes les associations liées à cet article
         await pool.query('DELETE FROM tag_article WHERE idArticle = ?', [id]);
-        // Supprimer les commentaires associés
+
         await pool.query('DELETE FROM comment WHERE idArticle = ?', [id]);
-        // Supprimer les favoris associés
+
         await pool.query('DELETE FROM favori WHERE idArticle = ?', [id]);
-        // Supprimer
+
+        // Supprimer l'article
         await pool.query('DELETE FROM article WHERE idArticle = ?', [id]);
         res.status(204).send();
 

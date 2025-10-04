@@ -1,13 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const auth = require('../middleware/auth');
+const authMiddleware = require('../middleware/auth');
 const pool = require('../services/connection');
 
 
 // Ajouter un favori
-router.post('/', auth, async (req, res) => {
+router.post('/', authMiddleware, async (req, res) => {
   try {
-    const { idArticle } = req.body; // On récupèr el'id de l'article à ajouter
+    const { idArticle } = req.body; // On récupère l'id de l'article à ajouter
     const idUser = req.user.idUser; // récupéré depuis le middleware
 
     if (!idUser) return res.status(401).json({ error: 'Non connecté' });
@@ -27,7 +27,7 @@ router.post('/', auth, async (req, res) => {
 });
 
 // Supprimer un favori
-router.delete('/:idArticle', auth, async (req, res) => {
+router.delete('/:idArticle', authMiddleware, async (req, res) => {
   try {
     const idUser = req.user.idUser;
 
@@ -47,7 +47,7 @@ router.delete('/:idArticle', auth, async (req, res) => {
 });
 
 // Récupérer les favoris d'un utilisateur
-router.get('/', auth, async (req, res) => {
+router.get('/', authMiddleware, async (req, res) => {
   try {
     const idUser = req.user.idUser;
 
