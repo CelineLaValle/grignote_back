@@ -40,11 +40,11 @@ router.get('/:idArticle', async (req, res) => {
 
         // On récupère tous les commentaires liés à cet article (et on peut aussi récupérer le pseudo de l'utilisateur)
         const [comments] = await pool.query(
-            `SELECT c.idComment, c.content, c.date, u.pseudo
-            FROM comment c
-            JOIN user u ON u.idUser = c.idUser
-            WHERE c.idArticle = ?
-            ORDER BY c.date DESC`,
+            `SELECT comment.idComment, comment.content, comment.date, user.pseudo
+            FROM comment
+            JOIN user ON user.idUser = comment.idUser
+            WHERE comment.idArticle = ?
+            ORDER BY comment.date DESC`,
             [idArticle]);
 
         // On retourne la liste des commentaires au client

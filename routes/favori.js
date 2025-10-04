@@ -56,10 +56,10 @@ router.get('/', auth, async (req, res) => {
 
     // On récupère les infos des articles favoris en les joignant avec la table article
     const [rows] = await pool.query(
-      `SELECT a.* 
-       FROM favori f
-       JOIN article a ON f.idArticle = a.idArticle
-       WHERE f.idUser = ?`,
+      `SELECT article.* 
+         FROM favori
+         JOIN article ON favori.idArticle = article.idArticle
+         WHERE favori.idUser = ?`,
       [idUser]
     );
 

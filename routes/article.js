@@ -49,9 +49,13 @@ router.get('/:id', async (req, res) => {
         const article = rows[0];
 
         // Récupérer les tags associés à cet article
-        const [tags] = await pool.query(
-            //t = alias pour tag, ta = tag_article
-            'SELECT t.idTag, t.name FROM tag t JOIN tag_article ta ON t.idTag = ta.idTag WHERE ta.idArticle = ?',
+        const [tags] = await pool.query(`
+            SELECT tag.idTag, tag.name 
+            FROM tag 
+            JOIN tag_article
+            ON tag.idTag = tag_article.idTag 
+            WHERE tag_article.idArticle = ?
+        `,
             [req.params.id]
         );
 
@@ -73,7 +77,10 @@ router.get('/', async (req, res) => {
 
         //Récupérer tous les tags avec leurs associations en une requête
         const [tagAssociations] = await pool.query(`
-            SELECT ta.idArticle, t.idTag, t.name FROM tag_article ta JOIN tag t ON ta.idTag = t.idTag ORDER BY ta.idArticle, t.name`);
+            SELECT tag_article.idArticle, tag.idTag, tag.name 
+            FROM tag_article 
+            JOIN tag ON tag_article.idTag = tag.idTag 
+            ORDER BY tag_article.idArticle, tag.name`);
 
         //Organiser les tags par article
         const tagsByArticle = {};
