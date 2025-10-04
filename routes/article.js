@@ -103,7 +103,7 @@ router.get('/', async (req, res) => {
 
 // Créer un nouvel article
 
-router.post('/', upload.single('image'), async (req, res) => {
+router.post('/', authMiddleware, upload.single('image'), async (req, res) => {
 
     // On récupère les données du formulaire depuis req.body
     const { title, ingredient, content, category, idUser } = req.body;
