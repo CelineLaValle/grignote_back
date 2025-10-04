@@ -21,8 +21,8 @@ const upload = multer({ storage });  // Indique à Multer comment et où stocker
 //     }
 // }
 
-router.get('/user/:idUser', authMiddleware, async (req, res) => {
-    const idUser = req.params.idUser;
+router.get('/user/:idUser', async (req, res) => {
+    const idUser = req.user.idUser;
     try {
         const [rows] = await pool.query('SELECT * FROM article WHERE idUser = ?', [idUser]);
         res.json(rows);
