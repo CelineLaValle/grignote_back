@@ -55,15 +55,11 @@ router.post('/', async (req, res) => {
             process.env.JWT_SECRET,
             { expiresIn: '2h' }
         );
+        
         // Envoie le token dans un cookie HTTP-only
-        res.cookie('token', token, {
-            httpOnly: true, // Protège contre les attaques XSS : JavaScript ne peut pas lire le cookie
-            secure: process.env.NODE_ENV === 'production', // Envoie le cookie uniquement en HTTPS si on est en production
-            sameSite: 'none', // Empêche l'envoi du cookie sur des requêtes cross-site -> protection CSRF
-            maxAge: 2 * 60 * 60 * 1000 // Durée de vie du cookie
-        });
-        console.log('Headers juste avant envoi :', res.getHeaders());
-
+        res.setHeader('Set-Cookie', [
+        `token=${token}; Path=/; Max-Age=7200; HttpOnly; Secure; SameSite=None; Partitioned; Expires=${new Date(Date.now() + 7200 * 1000).toUTCString()}`
+        ]);
 
         res.json({
             message: 'Connexion réussie',
