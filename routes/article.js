@@ -70,6 +70,7 @@ router.get('/:id', async (req, res) => {
 
 
 // Récupérer tous les articles avec leurs tags
+
 router.get('/', async (req, res) => {
     try {
         //Récupérer tous les articles (les plus récents en premier)
@@ -82,7 +83,7 @@ router.get('/', async (req, res) => {
             JOIN tag ON tag_article.idTag = tag.idTag 
             ORDER BY tag_article.idArticle, tag.name`);
 
-        //Organiser les tags par article
+        // Remplit un objet (tagsByArticle) avec les tags associés à chaque article
         const tagsByArticle = {};
         tagAssociations.forEach(association => {
             if (!tagsByArticle[association.idArticle]) {
@@ -94,7 +95,7 @@ router.get('/', async (req, res) => {
             });
         });
 
-        // 4. Ajouter les tags à chaque article
+        // Transforme chaque article pour lui ajouter ses tags
         const articlesWithTags = articles.map(article => ({
             ...article,
             tags: tagsByArticle[article.idArticle] || []
@@ -127,10 +128,11 @@ router.post('/', authMiddleware, upload.single('image'), async (req, res) => {
 
         // On retourne l'article nouvellement crée avec son ID généré automatiquement
         const newArticle = { id: result.insertId, title, ingredient, content, category, image, idUser };
-        // Si des tags sont envoyés avec la création de l'article
+        // Si des tags sont envoyés avec l'article, les associer à l'article créé
         if (req.body.tags) {
-            const tagIds = JSON.parse(req.body.tags); // tableau d'IDs en JSON
+            const tagIds = JSON.parse(req.body.tags); // Récupérer le tableau d'IDs en JSON
             if (tagIds.length > 0) {
+                // Crée un tableau [idTag, idArticle] pour l'insertion
                 const values = tagIds.map(tagId => [tagId, result.insertId]);
                 await pool.query(
                     'INSERT INTO tag_article (idTag, idArticle) VALUES ?',
@@ -147,7 +149,7 @@ router.post('/', authMiddleware, upload.single('image'), async (req, res) => {
     }
 });
 
-// Modifier un article existant
+// Modifier un article
 
 router.put('/:id', authMiddleware, upload.single('image'), async (req, res) => {
     const { title, ingredient, content, category } = req.body;
@@ -178,20 +180,19 @@ router.put('/:id', authMiddleware, upload.single('image'), async (req, res) => {
             [title, ingredient, content, category, image || article.image, req.params.id]
         );
 
-        // Supprimer les anciens tags de l'article
-        await pool.query('DELETE FROM tag_article WHERE idArticle = ?', [req.params.id]);
+            // Met à jour les tags seulement si de nouveaux tags sont envoyés
+            if (req.body.tags) {
+                const tagIds = JSON.parse(req.body.tags);
+                if (tagIds.length > 0) {
+                    // Supprimer les anciens tags uniquement si on a de nouveaux tags
+                    await pool.query('DELETE FROM tag_article WHERE idArticle = ?', [req.params.id]);
 
-        // Réinsérer les nouveaux si envoyés
-        if (req.body.tags) {
-            const tagIds = JSON.parse(req.body.tags);
-            if (tagIds.length > 0) {
-                const values = tagIds.map(tagId => [tagId, req.params.id]);
-                await pool.query(
-                    'INSERT INTO tag_article (idTag, idArticle) VALUES ?',
-                    [values]
-                );
+                    // Insérer les nouveaux tags
+                    const values = tagIds.map(tagId => [tagId, req.params.id]);
+                    await pool.query('INSERT INTO tag_article (idTag, idArticle) VALUES ?', [values]);
+                }
             }
-        }
+        
 
         // On retourne l'article modifié (nouvelle valeur)
         res.json({ id: parseInt(req.params.id), title, ingredient, content, category, image });

@@ -7,6 +7,7 @@ const pool = require('../services/connection');
 // Récupérer toutes les catégories distinctes
 router.get('/', async (req, res) => {
   try {
+    // Ici LIKE affiche directement la colonne category
     const [rows] = await pool.query("SHOW COLUMNS FROM article LIKE 'category'");
 
     if (rows.length === 0) return res.json([]);
