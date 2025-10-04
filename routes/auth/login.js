@@ -62,6 +62,7 @@ router.post('/', async (req, res) => {
             sameSite: 'none', // Empêche l'envoi du cookie sur des requêtes cross-site -> protection CSRF
             maxAge: 2 * 60 * 60 * 1000 // Durée de vie du cookie
         });
+            console.log('Login OK, envoi du cookie');
 
         res.json({
             message: 'Connexion réussie',
