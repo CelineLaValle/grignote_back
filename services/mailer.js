@@ -8,7 +8,6 @@ const transporter = nodemailer.createTransport({
     user: process.env.GMAIL_USER,
     pass: process.env.GMAIL_PASS,
   },
-  connectionTimeout: 10000,
 });
 
 // Fonction pour envoyer le mail de confirmation

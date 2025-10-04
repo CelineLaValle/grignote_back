@@ -50,7 +50,7 @@ router.post('/', async (req, res) => {
 
         // On retourne le tag nouvellement crée avec don ID généré automatiquement
         const newTag = { idTag: result.insertId, name };
-        res.status(201).json(newTag); // 201 = Created
+        res.status(201).json(newTag);
     } catch (err) {
         res.status(500).json({ error: 'Erreur serveur' });
     }
@@ -95,8 +95,7 @@ router.delete('/:id', async (req, res) => {
             return res.status(404).json({ message: 'Tag non trouvé' });
         }
 
-        // Suppression réussie, pas besoin de contenu en retour
-        res.status(204).send(); // 204 = No Content
+        res.status(204).send(); 
     } catch (err) {
         res.status(500).json({ error: 'Erreur serveur' });
     }

@@ -1,11 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../services/connection');
+const authMiddleware = require('../middleware/auth');
 
 
 // Récupérer tout les utilisateurs
 
-router.get('/', async (req, res) => {
+router.get('/', authMiddleware, async (req, res) => {
 
     try {
         
@@ -16,8 +17,9 @@ router.get('/', async (req, res) => {
     }
 });
 
-// Obtenir un utilisateur par son ID
-router.get('/:id', async (req, res) => {
+// Récupérer un utilisateur par son ID
+
+router.get('/:id', authMiddleware, async (req, res) => {
     try {
         
         const [rows] = await pool.query('SELECT * FROM user WHERE idUser = ?', [req.params.id]);
@@ -34,7 +36,7 @@ router.get('/:id', async (req, res) => {
 
 // Modifier un utilisateur
 
-router.put('/:id', async (req, res) => {
+router.put('/:id', authMiddleware, async (req, res) => {
     const { pseudo, email, role } = req.body;
 
     try {
@@ -54,7 +56,7 @@ router.put('/:id', async (req, res) => {
 });
 
 // Suspendre/Réactiver un utilisateur (toggle)
-router.patch('/suspend/:id', async (req, res) => {
+router.patch('/suspend/:id', authMiddleware, async (req, res) => {
     try {
         
 
@@ -89,7 +91,7 @@ router.patch('/suspend/:id', async (req, res) => {
 
 // Supprimer un utilisateur
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', authMiddleware, async (req, res) => {
 
     try {
         

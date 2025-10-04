@@ -4,7 +4,7 @@ const pool = require('../services/connection');
 
 
 router.get('/', async (req, res) => {
-    const token = req.query.token; // récupère ?token=xxxx dans l'URL
+    const token = req.query.token; // Récupère ?token=xxxx dans l'URL
     if (!token) {
         return res.status(400).json({ message: 'Token manquant' });
     }
