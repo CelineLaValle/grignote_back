@@ -7,7 +7,7 @@ const pool = require('../../services/connection');
 router.post('/', async (req, res) => {
     const { email, password } = req.body;
 
-    // Validation des champs
+    // Vérifie que les champs sont fournis
     if (!email || !password) {
         return res.status(400).json({ message: 'Email et mot de passe requis' });
     }
