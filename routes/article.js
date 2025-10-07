@@ -168,19 +168,19 @@ router.put('/:id', authMiddleware, upload.single('image'), async (req, res) => {
             [title, ingredient, content, category, image || article.image, req.params.id]
         );
 
-            // Met à jour les tags seulement si de nouveaux tags sont envoyés
-            if (req.body.tags) {
-                const tagIds = JSON.parse(req.body.tags);
-                if (tagIds.length > 0) {
-                    // Supprimer les anciens tags uniquement si on a de nouveaux tags
-                    await pool.query('DELETE FROM tag_article WHERE idArticle = ?', [req.params.id]);
+        // Met à jour les tags seulement si de nouveaux tags sont envoyés
+        if (req.body.tags) {
+            const tagIds = JSON.parse(req.body.tags);
+            if (tagIds.length > 0) {
+                // Supprimer les anciens tags uniquement si on a de nouveaux tags
+                await pool.query('DELETE FROM tag_article WHERE idArticle = ?', [req.params.id]);
 
-                    // Insérer les nouveaux tags
-                    const values = tagIds.map(tagId => [tagId, req.params.id]);
-                    await pool.query('INSERT INTO tag_article (idTag, idArticle) VALUES ?', [values]);
-                }
+                // Insérer les nouveaux tags
+                const values = tagIds.map(tagId => [tagId, req.params.id]);
+                await pool.query('INSERT INTO tag_article (idTag, idArticle) VALUES ?', [values]);
             }
-        
+        }
+
 
         // On retourne l'article modifié (nouvelle valeur)
         res.json({ id: parseInt(req.params.id), title, ingredient, content, category, image });
@@ -219,7 +219,7 @@ router.delete('/:id', authMiddleware, async (req, res) => {
         }
 
         // Supprimer l'image de Cloudinary
-          if (article.image) {
+        if (article.image) {
             const publicId = article.image.split('/').pop().split('.')[0];
             await cloudinary.uploader.destroy(`grignotages/${publicId}`);
         }

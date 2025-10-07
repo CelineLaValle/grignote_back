@@ -95,7 +95,7 @@ router.delete('/:id', async (req, res) => {
             return res.status(404).json({ message: 'Tag non trouvé' });
         }
 
-        res.status(204).send(); 
+        res.status(204).send();
     } catch (err) {
         res.status(500).json({ error: 'Erreur serveur' });
     }

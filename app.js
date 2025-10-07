@@ -36,7 +36,7 @@ app.use(cookieParser());
 app.use('/auth/register', register);
 app.use('/auth/login', login);
 app.use('/auth/logout', logout);
-app.use('/auth/me', authMe); 
+app.use('/auth/me', authMe);
 
 // Routes principales
 app.use('/article', article);
@@ -50,5 +50,5 @@ app.use('/verify', verify);
 
 // Lancement du serveur
 app.listen(4000, () => {
-    console.log('Serveur démarré sur le port 4000');
+  console.log('Serveur démarré sur le port 4000');
 });

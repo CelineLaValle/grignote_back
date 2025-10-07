@@ -55,10 +55,10 @@ router.post('/', async (req, res) => {
             process.env.JWT_SECRET,
             { expiresIn: '2h' }
         );
-        
+
         // Envoie le token dans un cookie HTTP-only
         res.setHeader('Set-Cookie', [
-        `token=${token}; Path=/; Max-Age=7200; HttpOnly; Secure; SameSite=None; Partitioned; Expires=${new Date(Date.now() + 7200 * 1000).toUTCString()}`
+            `token=${token}; Path=/; Max-Age=7200; HttpOnly; Secure; SameSite=None; Partitioned; Expires=${new Date(Date.now() + 7200 * 1000).toUTCString()}`
         ]);
 
         res.json({

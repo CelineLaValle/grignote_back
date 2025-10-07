@@ -11,7 +11,7 @@ router.post('/', (req, res) => {
     });
 
     // On retourne une réponse de succès
-    res.json({message: 'Déconnexion réussie'});
+    res.json({ message: 'Déconnexion réussie' });
 });
 
 module.exports = router;

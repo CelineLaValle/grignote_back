@@ -22,8 +22,8 @@ router.get('/', async (req, res) => {
 
     res.json(categories);
   } catch (err) {
-        res.status(500).json({ error: 'Erreur serveur' });
-    }
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
 });
 
 

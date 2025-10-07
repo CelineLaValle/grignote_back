@@ -3,7 +3,7 @@ const router = express.Router();
 const jwt = require('jsonwebtoken');
 
 router.get('/', (req, res) => {
-    
+
     // Récupération du token JWT depuis les cookies envoyés par le navigateur
     const token = req.cookies.token;
     if (!token) {

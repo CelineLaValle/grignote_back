@@ -14,7 +14,7 @@ router.post('/', authMiddleware, async (req, res) => {
 
 
 
-// Utilisation de INSERT IGNORE pour éviter les doublons
+    // Utilisation de INSERT IGNORE pour éviter les doublons
     await pool.query(
       'INSERT IGNORE INTO favori (idUser, idArticle) VALUES (?, ?)',
       [idUser, idArticle]

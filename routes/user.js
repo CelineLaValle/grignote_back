@@ -9,7 +9,7 @@ const authMiddleware = require('../middleware/auth');
 router.get('/', async (req, res) => {
 
     try {
-        
+
         const [user] = await pool.query('SELECT * FROM user');
         res.json(user);
     } catch (err) {
@@ -21,7 +21,7 @@ router.get('/', async (req, res) => {
 
 router.get('/:id', async (req, res) => {
     try {
-        
+
         const [rows] = await pool.query('SELECT * FROM user WHERE idUser = ?', [req.params.id]);
 
         if (rows.length === 0) {
@@ -41,7 +41,7 @@ router.put('/:id', authMiddleware, async (req, res) => {
 
     try {
 
-        
+
         const [result] = await pool.query('UPDATE user SET pseudo = ?, email = ?, role = ? WHERE idUser = ?', [pseudo, email, role, req.params.id]);
 
         if (result.affectedRows === 0) {
@@ -58,7 +58,7 @@ router.put('/:id', authMiddleware, async (req, res) => {
 // Suspendre/Réactiver un utilisateur (toggle)
 router.patch('/suspend/:id', authMiddleware, async (req, res) => {
     try {
-        
+
 
         // Récupérer l'état actuel
         const [rows] = await pool.query(
@@ -94,7 +94,7 @@ router.patch('/suspend/:id', authMiddleware, async (req, res) => {
 router.delete('/:id', authMiddleware, async (req, res) => {
 
     try {
-        
+
         const [result] = await pool.query('DELETE FROM user WHERE idUser = ?', [req.params.id]);
         if (result.affectedRows === 0) {
             return res.status(404).json({ message: 'Utilisateur non trouvé' });
