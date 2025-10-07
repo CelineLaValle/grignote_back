@@ -205,7 +205,7 @@ router.delete('/:id', authMiddleware, async (req, res) => {
             return res.status(404).json({ message: 'Article non trouvé' });
         }
 
-        // Vérifier l'auteur de l'article
+        // Vérifier que l'auteur de l'article existe
         const [userRows] = await pool.query('SELECT * FROM user WHERE idUser = ?', [article.idUser]);
         const userArticle = userRows[0];
 
