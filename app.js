@@ -15,6 +15,7 @@ const login = require('./routes/auth/login.js');
 const logout = require('./routes/auth/logout.js');
 const authMe = require('./routes/auth/me.js'); // Import de la route pour récupérer les infos utilisateur
 
+// Création d’une instance d’Express
 const app = express();
 
 // Configuration des options CORS
