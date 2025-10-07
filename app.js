@@ -32,7 +32,7 @@ app.use(express.json());
 // Middleware pour parser les cookies
 app.use(cookieParser());
 
-// Routes d'authentification (à séparer pour éviter les conflits)
+// Routes d'authentification
 app.use('/auth/register', register);
 app.use('/auth/login', login);
 app.use('/auth/logout', logout);
